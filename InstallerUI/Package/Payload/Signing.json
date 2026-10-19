@@ -1,0 +1,9 @@
+﻿{
+    "Schema":  1,
+    "Mode":  "Microsoft",
+    "Product":  "Interceptor-Gamepad-Controller",
+    "DriverVersion":  "1.0.0.0",
+    "TrialSeconds":  7200,
+    "SourceArchiveSHA256":  "4F47C74F1904D9818DC602A9AA4996B47D641E00E4C7E5EDD8E1B5D298610C84",
+    "CodeBodySHA256":  "D6EDFBC2E8EA00CDFF6EF8D7DDD67B223FE74A0EDC96D3D68B1526128F27924E"
+}
