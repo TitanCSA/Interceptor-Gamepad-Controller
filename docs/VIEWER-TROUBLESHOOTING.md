@@ -1,8 +1,9 @@
 # Input viewer diagnostics
 
-Use the [1.0.1.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-demo),
-which includes the Microsoft-signed driver fix and updated viewer. Its native
+Use the [1.0.2.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo),
+which includes the Microsoft-signed driver and updated viewer. Its native
 bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
+The Microsoft signature covers the driver package, not the application EXEs.
 
 Click **Observe** once in the required tab. **XInput / XUSB** covers the native
 Xbox 360 transport; **XInputHID** is a different input family. Keyboard activity
@@ -33,9 +34,10 @@ report could arrive before its translated HID view became capturable. The
 all-device context treated the still-unattached source as a device change and
 revoked capture. Keyboard activity could change timing but is not a solution.
 
-The signed 1.0.1.0 driver keeps that source in normal passthrough until it
-can join the context. Attached-device failures and queue overflow still release
-capture. Packet formats and the two-hour demo are unchanged.
+The fix introduced in signed driver 1.0.1.0 and retained in 1.0.2.0 keeps that
+source in normal passthrough until it can join the context. Attached-device
+failures and queue overflow still release capture. Packet formats and the
+two-hour demo are unchanged.
 
 Download the new **InterceptorSetup.exe** and choose **Install / reinstall**,
 or run the new **InterceptorSetupConsole.exe /install**. Use Windows **Restart**
@@ -53,22 +55,23 @@ compatible by this change; support depends on the Windows stack and descriptor.
 
 ## Idle XUSB startup follow-up
 
-The 1.0.2.0 viewer preview reports native XUSB source-opening failures with
+The 1.0.2.0 SDK and viewer report native XUSB source-opening failures with
 their exact operation, input family and Windows error. The SDK no longer
 silently discards a registered native source and leaves an empty observation
 running when that source fails to start. Unsupported transparent generic
 HID/XInputHID collections remain omitted; failures of a mandatory XUSB mirror
 are reported. Interfaces that actually disappear keep their normal behavior.
 
-The accompanying kernel 1.0.2.0 candidate also initializes the reader from
+The signed 1.0.2.0 kernel also initializes the reader from
 Windows' cached unfiltered physical state, then arms ordinary input reception
 before declaring the source ready. It does not insert a fake input into the
-capture queue or poll the controller. **This kernel update is awaiting its own
-Microsoft signature; the preview EXE does not replace an installed driver.**
-The latest full signed installer remains 1.0.1.0 until a new signed package is
-published.
+capture queue or poll the controller. **Use the full 1.0.2.0 release's installer
+to update the kernel; the viewer EXE alone does not replace an installed driver.**
+The earlier [1.0.2.0 viewer-only preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-viewer)
+was published while kernel signing was pending and is now superseded by the full
+signed package. Earlier release downloads remain unchanged.
 
-The user's physical-controller failure has not been reproduced with the
+The reported physical-controller failure has not been reproduced with the
 virtual Xbox 360 used in the Windows 11 lab: the signed 1.0.1.0 baseline already
 passes six idle Observe starts, three untouched seconds and one delayed report
 per cycle. Consequently, passing that virtual-device test alone does not
@@ -76,10 +79,11 @@ establish that the physical-controller issue is resolved. Deterministic tests
 exercise actual startup/source-opening code, including the formerly silent
 failure path, cancellation, malformed responses and repeated restarts.
 
-The 1.0.2.0 candidate and the exact preview viewer also pass six such Windows
-11 VM cycles: metadata is visible before stimulation, each startup has three
-untouched seconds, then one report is received and forwarded unchanged. No
-report submission or independent XInput read helps discovery during startup.
+The tested 1.0.2.0 candidate underlying the signed package and the viewer also
+pass six such Windows 11 VM cycles: metadata is visible before stimulation,
+each startup has three untouched seconds, then one report is received and
+forwarded unchanged. No report submission or independent XInput read helps
+discovery during startup.
 The actual kernel startup bodies pass 760,764 deterministic checks and 10,000
 restart cycles in both Release and AddressSanitizer builds. The SDK source-open
 tests pass 123 checks and reject the former silent-failure implementation.
@@ -99,9 +103,9 @@ complete reports and concurrent bridge disposal. More than 400 native assertions
 pass in each Release and AddressSanitizer run, including publication of a final
 input after a quiet wait, without another input to wake the viewer.
 
-A dedicated Windows 11 VM exercised the candidate and the published native
-bridge with one virtual Xbox 360 source: 12 Observe/Stop cycles, 192 exact
-button/axis/trigger states checked against an independent XInput consumer,
+A dedicated Windows 11 VM exercised the earlier 1.0.1.0 candidate and its
+published native bridge with one virtual Xbox 360 source: 12 Observe/Stop cycles,
+192 exact button/axis/trigger states checked against an independent XInput consumer,
 and 230 inputs received and forwarded unchanged. No keyboard or mouse input
 was used. The exact published EXE passed its embedded-bridge/UI self-tests in
 the same VM. Installation, associations and lab changes were restored, followed

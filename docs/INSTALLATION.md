@@ -1,6 +1,7 @@
 # Installation, diagnostics and recovery
 
-This edition includes its own verified Microsoft-signed demo driver. The release
+The [1.0.2.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo)
+includes this edition's Microsoft-signed demo driver. The release
 installers work without enabling test signing or importing a development certificate.
 
 Use `InterceptorSetup.exe` or
@@ -8,6 +9,9 @@ Use `InterceptorSetup.exe` or
 engine. `/uninstall` restores this product's associations and removes its packages.
 Exit code `3010` means a Windows restart is required. After installation and a
 restart, reopen the same installer or rerun `/install` to finish associations.
+For an upgrade, use the new release's **Install / reinstall** or `/install`;
+replacing only the viewer EXE leaves the older kernel driver installed.
+The Microsoft signature covers the driver package, not the installer or example EXEs.
 
 Installation and capture require administrator rights. Merely compiling an
 example does not install a driver. Each example checks for the correct product
