@@ -420,6 +420,12 @@ SourceHandles OpenControllerSources(std::uint8_t controllers,bool availableOnly=
     SourceHandles sources;
     const GUID sourceGuids[]={IC_HID_INTERFACE_GUID,IC_XUSB_INTERFACE_GUID,IC_XINPUTHID_INTERFACE_GUID,IC_XUSB_MIRROR_INTERFACE_GUID};
     const DWORD sourceIoctls[]={IOCTL_IC_HID_SOURCE,IOCTL_IC_XUSB_SOURCE,IOCTL_IC_XINPUTHID_SOURCE,IOCTL_IC_XUSB_MIRROR_SOURCE};
+    const auto sourceFailure=[](unsigned native,const char* operation,DWORD error) {
+        static constexpr const char* names[]={"Controller HID collection","XInput / XUSB parent",
+            "XInputHID collection","XInput / XUSB mandatory HID mirror"};
+        const auto message=std::string(names[native])+": "+operation+" (Win32 "+std::to_string(error)+")";
+        Fail(message.c_str(),error);
+    };
     // GIP is driven by Windows USB URBs. It has no user-mode source handle.
     for(unsigned native=0;native<4;++native)if(controllers&(native==3?Controller_Xinput:1u<<native)) {
         const auto before=sources.size();
@@ -441,8 +447,10 @@ SourceHandles OpenControllerSources(std::uint8_t controllers,bool availableOnly=
             source->value=CreateFileW(detail->DevicePath,GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,nullptr,OPEN_EXISTING,0,nullptr);
             if(source->value==INVALID_HANDLE_VALUE) {
                 const auto error=GetLastError();
-                if(availableOnly && (error==ERROR_DEVICE_NOT_CONNECTED || error==ERROR_NOT_READY || error==ERROR_FILE_NOT_FOUND || error==ERROR_GEN_FAILURE))continue;
-                Fail("Open controller source",error);
+                const bool optionalHid=native==0 || native==2;
+                if(availableOnly && (error==ERROR_DEVICE_NOT_CONNECTED || error==ERROR_FILE_NOT_FOUND ||
+                    (optionalHid && (error==ERROR_NOT_READY || error==ERROR_GEN_FAILURE))))continue;
+                sourceFailure(native,"open controller source (CreateFile)",error);
             }
             try {Io(source->value,sourceIoctls[native],nullptr,0,nullptr,0);}
             catch(const std::system_error& error) {
@@ -450,9 +458,15 @@ SourceHandles OpenControllerSources(std::uint8_t controllers,bool availableOnly=
                 // profiles. They must not disable capture of other supported
                 // HID/XInputHID devices. Keep other failures visible, and never
                 // omit a native XUSB mirror required for complete isolation.
-                if((native==0 || native==2) && error.code().value()==ERROR_NOT_SUPPORTED)continue;
-                if(availableOnly && (error.code().value()==ERROR_NOT_SUPPORTED || error.code().value()==ERROR_NOT_READY || error.code().value()==ERROR_DEVICE_NOT_CONNECTED))continue;
-                throw;
+                const auto code=static_cast<DWORD>(error.code().value());
+                const bool optionalHid=native==0 || native==2;
+                if(optionalHid && code==ERROR_NOT_SUPPORTED)continue;
+                if(availableOnly && (code==ERROR_DEVICE_NOT_CONNECTED ||
+                    (optionalHid && code==ERROR_NOT_READY)))continue;
+                // CREATE_ALL can reserve an absent/pending family, but closing
+                // its failed native source would stop the reader permanently.
+                // Report startup failure instead of a valid, empty context.
+                sourceFailure(native,"start controller source (SOURCE IOCTL)",code);
             }
             sources.push_back(std::move(source));
         }
@@ -631,8 +645,10 @@ static Context_Result CreateImpl(std::uint8_t mask,std::uint8_t controllers,cons
     const bool native=(controllers&Controller_Xinput)!=0;
     DWORD bytes=0;bool sourcesOpened=false;
     const auto attempt=[&] {
+        // Preserve the source's family, operation and original startup error.
+        // Only the CREATE request itself needs availability-error refinement.
+        if(!sourcesOpened){c->sources=OpenControllerSources(controllers,all);sourcesOpened=true;}
         try {
-            if(!sourcesOpened){c->sources=OpenControllerSources(controllers,all);sourcesOpened=true;}
             bytes=Io(c->driver.value,all?IOCTL_IC_CREATE_ALL:extended?IOCTL_IC_CREATE_NATIVE:native?IOCTL_IC_CREATE_XUSB:IOCTL_IC_CREATE,
                 extended?static_cast<const void*>(&extendedRequest):native?static_cast<const void*>(&nativeRequest):&request,
                 extended?sizeof(extendedRequest):native?sizeof(nativeRequest):sizeof(request),response.data(),static_cast<DWORD>(response.size()*8));

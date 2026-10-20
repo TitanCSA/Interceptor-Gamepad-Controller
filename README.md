@@ -18,6 +18,11 @@ during preparation. The viewer adds detailed automatic-stop errors and
 replacing the viewer EXE alone does not update an older driver.
 [Details and troubleshooting](docs/VIEWER-TROUBLESHOOTING.md).
 
+**[1.0.2.0 viewer preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-viewer):**
+native XUSB startup errors are now explicit instead of silently leaving an
+empty observation. The accompanying idle-start kernel update is awaiting
+Microsoft signing; this preview EXE alone does not update the installed driver.
+
 | Setup and diagnostics | Input viewer |
 | --- | --- |
 | ![Product-specific installer](docs/images/installer.png) | ![Input viewer with simulated input](docs/images/viewer.png) |
