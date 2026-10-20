@@ -11,6 +11,12 @@ See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
 · [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
 
+**Viewer update:** [ExampleUI 1.0.1.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-viewer)
+adds detailed automatic-stop errors and **Copy diagnostic**. The XUSB
+preparation fix also needs a new kernel signature; this viewer-only update
+does not replace the installed signed driver.
+[Details and troubleshooting](docs/VIEWER-TROUBLESHOOTING.md).
+
 | Setup and diagnostics | Input viewer |
 | --- | --- |
 | ![Product-specific installer](docs/images/installer.png) | ![Input viewer with simulated input](docs/images/viewer.png) |
