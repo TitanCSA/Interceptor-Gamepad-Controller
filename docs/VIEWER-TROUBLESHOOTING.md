@@ -5,6 +5,32 @@ which includes the Microsoft-signed driver and updated viewer. Its native
 bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
 The Microsoft signature covers the driver package, not the application EXEs.
 
+## Display responsiveness in viewer 1.0.3.0
+
+Download the [1.0.3.0 standalone viewer](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.3.0-viewer)
+for the latest display changes. The signed 1.0.2.0 driver remains current.
+The older complete 1.0.2.0 ZIP contains the preceding viewer.
+
+The native worker publishes changed state immediately after forwarding the
+received batch. The two former 33 ms display waits are removed. The UI requests
+one WPF rendering callback and reads the newest snapshot just before rendering;
+notifications arriving before that frame are coalesced. A final change during
+snapshot acknowledgement can request the following frame. The callback is
+unsubscribed after delivery and on close, so an idle viewer has no permanent
+rendering callback, display timer or busy loop.
+
+There is no fixed application FPS cap. Actual visible updates depend on WPF,
+Windows, the graphics system and the display. This does not promise zero
+end-to-end latency or make the hardware produce more reports. Forwarding remains
+before display decoding; the inputs counter measures reports, not presented FPS.
+
+Offline tests cover immediate final-state publication across 10,000 sessions,
+preserved forwarding and diagnostic behavior, bounded notifications, updates
+arriving during a frame read, disposal and dispatcher shutdown. Release and
+AddressSanitizer native fixtures each pass 120,291 checks; managed scheduler
+fixtures pass 60,019 checks. These are software tests, not physical latency or
+monitor-refresh measurements.
+
 Click **Observe** once in the required tab. **XInput / XUSB** covers the native
 Xbox 360 transport; **XInputHID** is a different input family. Keyboard activity
 is not required by either one.

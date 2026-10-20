@@ -55,8 +55,9 @@ namespace InterceptorViewer {
    var m=DeviceState.Empty();m.MouseButtons=1;m.Sequence=1;m.MouseX=17;var n=DeviceState.Empty();n.MouseButtons=8;n.Sequence=2;n.MouseX=-23;var merged=Dashboard.Aggregate(new[]{m,n},1);Check(merged.MouseButtons==9&&merged.MouseX==-23,"Mouse aggregation");
    Snapshot header;using(var bridge=new Bridge()){var states=bridge.Read(out header);Check(header.Status==0&&states.Length==0,"Idle bridge without capture");var diagnostic=bridge.ReadDiagnostic();Check(diagnostic.Stage==0&&diagnostic.Error==0,"Idle diagnostic without capture");}
    BridgeConcurrencyTest();
+   int frameChecks=FrameRefreshTests.Run();
    using(var dashboard=new Dashboard(true)){dashboard.SetPreview(SupportedKinds[0]);dashboard.LayoutForRender();dashboard.TestDiagnosticPresentation();}
-   Json(output,new{passed=true,installationCheck="installed, missing with setup instructions, and access denied",snapshotBytes=80,deviceBytes=1064,diagnosticBytes=1096,diagnostics="automatic stops: exact operation, family, device, sequence, Win32/reset codes, partial sends, copyable complete cause; offline status and ABI tests",keyCount=InputDrawing.KeyCount,aggregation="multi-keyboard release and mouse last packet",bridge="embedded DLL loaded, stopped snapshot read; four concurrent Read/Stop callers racing Dispose, repeated four times",captureStarted=false,installedAnything=false});
+   Json(output,new{passed=true,installationCheck="installed, missing with setup instructions, and access denied",snapshotBytes=80,deviceBytes=1064,diagnosticBytes=1096,diagnostics="automatic stops: exact operation, family, device, sequence, Win32/reset codes, partial sends, copyable complete cause; offline status and ABI tests",keyCount=InputDrawing.KeyCount,aggregation="multi-keyboard release and mouse last packet",bridge="embedded DLL loaded, stopped snapshot read; four concurrent Read/Stop callers racing Dispose, repeated four times",display="event-driven native publication and one pending WPF frame; no application FPS cap, display timer or idle rendering subscription",frameChecks=frameChecks,captureStarted=false,installedAnything=false});
   }
   static void BridgeConcurrencyTest(){
    for(int cycle=0;cycle<4;++cycle)using(var bridge=new Bridge())using(var ready=new CountdownEvent(4))using(var go=new ManualResetEvent(false)){
@@ -97,12 +98,13 @@ namespace InterceptorViewer {
   public readonly Window Window;public readonly Grid Root;
   readonly TabControl tabs=new TabControl(),controllerTabs=new TabControl();readonly ComboBox devices=new ComboBox(),layout=new ComboBox();
   readonly Button start=new Button(),stop=new Button(),copyDiagnostic=new Button();readonly TextBlock state=new TextBlock(),detail=new TextBlock(),count=new TextBlock(),deviceDetail=new TextBlock(),notice=new TextBlock();
-  readonly InputDrawing drawing=new InputDrawing();readonly DispatcherTimer refresh=new DispatcherTimer(DispatcherPriority.Background);readonly bool preview,suppressRestartPrompt;
-  Bridge bridge;RegisteredWaitHandle registration;DeviceState[] snapshotDevices=new DeviceState[0];Snapshot header;string deviceSignature="";bool changing,busy,active,closeAllowed,closingRequested;volatile bool closed;int uiScheduled;bool disposed;
+  readonly InputDrawing drawing=new InputDrawing();readonly FrameRefresh refresh;readonly bool preview,suppressRestartPrompt;
+  Bridge bridge;RegisteredWaitHandle registration;DeviceState[] snapshotDevices=new DeviceState[0];Snapshot header;string deviceSignature="";bool changing,busy,active,closeAllowed,closingRequested;volatile bool closed;bool disposed;
   Task lifecycle=Task.FromResult(0);bool restartPromptShown;string diagnosticText="";
   sealed class Choice {public uint Type,Id,Token;public string Label;public override string ToString(){return Label;}}
   public Dashboard(bool preview,bool suppressRestartPrompt=false){
    this.preview=preview;this.suppressRestartPrompt=suppressRestartPrompt;Window=new Window{Title="Interceptor Gamepad / Controller · Input viewer",Width=1220,Height=850,MinWidth=900,MinHeight=690,Background=Palette.Soft,FontFamily=new FontFamily("Segoe UI"),WindowStartupLocation=WindowStartupLocation.CenterScreen};
+   refresh=new FrameRefresh(Window.Dispatcher,ReadSnapshot);
    Window.Resources.Add(typeof(Button),ButtonStyle());Window.Resources.Add(typeof(TabItem),TabStyle());
    Root=new Grid{Background=Palette.Soft,Margin=new Thickness(0)};Root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});Root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});Root.RowDefinitions.Add(new RowDefinition{Height=new GridLength(1,GridUnitType.Star)});Root.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});Window.Content=Root;
    var heading=new Grid{Margin=new Thickness(28,24,28,17)};heading.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});heading.ColumnDefinitions.Add(new ColumnDefinition());heading.ColumnDefinitions.Add(new ColumnDefinition{Width=GridLength.Auto});
@@ -127,14 +129,13 @@ namespace InterceptorViewer {
    copyDiagnostic.Click+=(s,e)=>{try{Clipboard.SetText(diagnosticText);copyDiagnostic.Content="Diagnostic copied";}catch(Exception error){copyDiagnostic.Content="Copy diagnostic";detail.Text="Could not copy the diagnostic: "+error.Message;}};
    Grid.SetColumn(copyDiagnostic,1);footer.Children.Add(copyDiagnostic);Grid.SetRow(footer,3);Root.Children.Add(footer);
    tabs.SelectionChanged+=async(s,e)=>{if(e.Source==tabs&&!changing)await ChangeTab();};controllerTabs.SelectionChanged+=async(s,e)=>{if(e.Source==controllerTabs&&!changing)await ChangeTab();};
-   refresh.Interval=TimeSpan.FromMilliseconds(33);refresh.Tick+=(s,e)=>{refresh.Stop();Interlocked.Exchange(ref uiScheduled,0);if(!closed)ReadSnapshot();};
    Window.Closing+=async(s,e)=>{
     if(closeAllowed||disposed)return;e.Cancel=true;if(closingRequested)return;
     closingRequested=true;UpdateControls();
     try{await lifecycle;if(!closed)await Stop();closeAllowed=true;if(!closed)Window.Close();}
     catch(Exception error){closingRequested=false;if(!closed){state.Text="Close interrupted";detail.Text=error.Message;UpdateControls();}}
    };
-   Window.Closed+=(s,e)=>{closed=true;refresh.Stop();};SetView();
+   Window.Closed+=(s,e)=>{closed=true;refresh.Dispose();};SetView();
   }
   static TextBlock Label(string text,double size,Brush brush,FontWeight? weight=null){return new TextBlock{Text=text,FontSize=size,Foreground=brush,FontWeight=weight??FontWeights.Normal};}
   static Style ButtonStyle(){return (Style)XamlReader.Parse("<Style xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='{x:Type Button}' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><Setter Property='Background' Value='#EFF4FA'/><Setter Property='Foreground' Value='#152744'/><Setter Property='Padding' Value='17,11'/><Setter Property='FontSize' Value='14'/><Setter Property='FontWeight' Value='SemiBold'/><Setter Property='Cursor' Value='Hand'/><Setter Property='Template'><Setter.Value><ControlTemplate TargetType='{x:Type Button}'><Border Background='{TemplateBinding Background}' CornerRadius='9' Padding='{TemplateBinding Padding}'><ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/></Border><ControlTemplate.Triggers><Trigger Property='IsMouseOver' Value='True'><Setter Property='Opacity' Value='0.85'/></Trigger><Trigger Property='IsPressed' Value='True'><Setter Property='Opacity' Value='0.65'/></Trigger><Trigger Property='IsEnabled' Value='False'><Setter Property='Opacity' Value='0.4'/></Trigger></ControlTemplate.Triggers></ControlTemplate></Setter.Value></Setter></Style>");}
@@ -170,8 +171,7 @@ namespace InterceptorViewer {
    if(success&&readAfter&&!closed&&!closingRequested)ReadSnapshot();
   }
   void EnsureBridge(){if(bridge!=null)return;var created=new Bridge();try{registration=ThreadPool.RegisterWaitForSingleObject(created.Changed,(s,t)=>{
-    if(closed||Interlocked.Exchange(ref uiScheduled,1)!=0)return;
-    try{Window.Dispatcher.BeginInvoke(new Action(()=>{if(!closed&&!refresh.IsEnabled)refresh.Start();}),DispatcherPriority.Background);}catch(InvalidOperationException){Interlocked.Exchange(ref uiScheduled,0);}
+    if(!closed)refresh.Request();
    },null,Timeout.Infinite,false);
     bridge=created;
    }catch{created.Dispose();throw;}
@@ -362,6 +362,6 @@ namespace InterceptorViewer {
     dashboard.Window.Close();await dashboard.TestClosed();phases.Add("New capture after close, then close with active capture");
    }
   }
-  public void Dispose(){if(disposed)return;disposed=true;closed=true;refresh.Stop();if(registration!=null){using(var complete=new ManualResetEvent(false)){if(registration.Unregister(complete))complete.WaitOne();}registration=null;}if(bridge!=null){bridge.Dispose();bridge=null;}}
+  public void Dispose(){if(disposed)return;disposed=true;closed=true;refresh.Dispose();if(registration!=null){using(var complete=new ManualResetEvent(false)){if(registration.Unregister(complete))complete.WaitOne();}registration=null;}if(bridge!=null){bridge.Dispose();bridge=null;}}
  }
 }

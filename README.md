@@ -11,6 +11,12 @@ See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
 · [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
 
+**[Viewer 1.0.3.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.3.0-viewer):**
+removes both 33 ms display delays. State is published after forwarding each
+received batch and displayed on the next available WPF frame, with no fixed
+application FPS limit. It uses the signed 1.0.2.0 driver; no reinstall is needed
+if that driver is already installed.
+
 **[1.0.2.0 demo update](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo):**
 the Microsoft-signed driver initializes XUSB from its cached physical state
 before arming input reception. Native startup failures now include their

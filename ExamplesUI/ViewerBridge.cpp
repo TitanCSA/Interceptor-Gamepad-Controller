@@ -1,5 +1,4 @@
 #include "ViewerDecoder.h"
-#include "PublicationCadence.h"
 #include <algorithm>
 #include <array>
 #include <condition_variable>
@@ -58,7 +57,7 @@ struct Session {
     std::vector<Device> devices;
     std::array<std::array<int, VIEWER_MAX_DEVICES + 1>, 7> indices{};
     uint64_t received = 0, forwarded = 0;
-    Viewer::PublicationCadence publication;
+    bool snapshotChanged = false;
     uint8_t visibleInputs = 0, visibleControllers = 0;
     VIEWER_DIAGNOSTIC operation{sizeof(VIEWER_DIAGNOSTIC), VIEWER_VERSION};
     uint32_t readyMask = 0;
@@ -120,7 +119,7 @@ struct Session {
             published[n] = devices[n].state;
         snapshot.status = devices.empty() ? ViewerPreparing : ViewerRunning;
         NotifyLocked();
-        publication.Committed(GetTickCount64());
+        snapshotChanged = false;
     }
     Device *Find(uint32_t type, uint32_t id) noexcept {
         if (type > 6 || id > VIEWER_MAX_DEVICES)
@@ -135,10 +134,10 @@ struct Session {
         for (size_t n = 0; n < devices.size(); ++n)
             published[n] = devices[n].state;
         NotifyLocked();
-        publication.Committed(GetTickCount64());
+        snapshotChanged = false;
     }
-    void PublishIfDue() {
-        if (publication.Due(GetTickCount64()))
+    void PublishIfChanged() {
+        if (snapshotChanged)
             Publish();
     }
     template <class T, class Getter, class Sender, class Decoder>
@@ -191,7 +190,7 @@ struct Session {
             decode(buffer[n], *d);
             Viewer::Metadata(input.sequence, input.timestamp, d->state);
         }
-        publication.Changed();
+        snapshotChanged = true;
     }
     template <class T> static const T &Header(const T &input) { return input; }
     static const IC_CONTROLLER_GIP_INPUT &Header(const IC_CONTROLLER_GIP_RAW_INPUT &input) {
@@ -280,12 +279,11 @@ void Run(uint8_t mask, uint8_t controllers) noexcept {
             s.Stage(ViewerStageWait);
             s.readyMask = 0;
             const auto ready =
-                Interceptor::Wait_For_Input(*s.capture, s.publication.Wait(GetTickCount64()), stopEvent);
+                Interceptor::Wait_For_Input(*s.capture, INFINITE, stopEvent);
             s.readyMask = ready;
             if (StopRequested())
                 break;
             if (!ready) {
-                s.PublishIfDue();
                 continue;
             }
 #define TRANSFER(bit, type, buffer, Name, Decode)                                                            \
@@ -324,7 +322,7 @@ void Run(uint8_t mask, uint8_t controllers) noexcept {
                          [](const auto &in, Device &d) { Viewer::DecodeNative(in.state, true, d.state); });
             }
 #undef TRANSFER
-            s.PublishIfDue();
+            s.PublishIfChanged();
         }
         Interceptor::Destroy_Context(s.capture);
     } catch (...) {
