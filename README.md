@@ -11,10 +11,11 @@ See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
 · [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
 
-**Viewer update:** [ExampleUI 1.0.1.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-viewer)
-adds detailed automatic-stop errors and **Copy diagnostic**. The XUSB
-preparation fix also needs a new kernel signature; this viewer-only update
-does not replace the installed signed driver.
+**[1.0.1.0 demo update](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-demo):**
+the Microsoft-signed driver fixes capture stopping when XUSB input arrives
+during preparation. The viewer adds detailed automatic-stop errors and
+**Copy diagnostic**. Upgrade with this release's UI or console installer;
+replacing the viewer EXE alone does not update an older driver.
 [Details and troubleshooting](docs/VIEWER-TROUBLESHOOTING.md).
 
 | Setup and diagnostics | Input viewer |
@@ -79,8 +80,8 @@ All binaries and checksums are in [Releases](https://github.com/TitanCSA/Interce
 | `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
 | `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
 | `InterceptorExampleUI.exe` | Standalone input viewer |
-| `Interceptor-Gamepad-Controller-Examples-1.0.0.0.zip` | Console examples and viewer |
-| `Interceptor-Gamepad-Controller-SDK-1.0.0.0.zip` | Two-file SDK and example source |
+| `Interceptor-Gamepad-Controller-1.0.1.0-demo.zip` | Complete bundle: installers, console examples and viewer |
+| `Interceptor-Gamepad-Controller-1.0.1.0-demo-SDK.zip` | Two-file SDK and example source |
 
 ```text
 Interceptor/       Interceptor.h + Interceptor.cpp; no SDK DLL required

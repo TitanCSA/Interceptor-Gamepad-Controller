@@ -1,8 +1,8 @@
 # Input viewer diagnostics
 
-Use the [1.0.1.0 viewer](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-viewer)
-with the installed Gamepad & Controller edition. Its native bridge is embedded
-in `InterceptorExampleUI.exe`; no separate DLL needs copying.
+Use the [1.0.1.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-demo),
+which includes the Microsoft-signed driver fix and updated viewer. Its native
+bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
 
 Click **Observe** once in the required tab. **XInput / XUSB** covers the native
 Xbox 360 transport; **XInputHID** is a different input family. Keyboard activity
@@ -33,15 +33,18 @@ report could arrive before its translated HID view became capturable. The
 all-device context treated the still-unattached source as a device change and
 revoked capture. Keyboard activity could change timing but is not a solution.
 
-The 1.0.1.0 kernel candidate keeps that source in normal passthrough until it
+The signed 1.0.1.0 driver keeps that source in normal passthrough until it
 can join the context. Attached-device failures and queue overflow still release
 capture. Packet formats and the two-hour demo are unchanged.
 
-**The kernel candidate requires a new Microsoft signature.** This viewer-only
-release improves diagnostics; it does not install that candidate or replace
-the signed 1.0.0.0 driver. Replacing the EXE alone cannot fix this kernel race.
-Signed-driver installers remain in the separate
-[1.0.0.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.0.0-demo).
+Download the new **InterceptorSetup.exe** and choose **Install / reinstall**,
+or run the new **InterceptorSetupConsole.exe /install**. Use Windows **Restart**
+when requested, then reopen the installer or rerun `/install` to finish device
+associations. Console exit code `3010` means a restart is required.
+
+The earlier [1.0.1.0 viewer-only release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-viewer)
+added diagnostics without replacing the installed driver. Its EXE alone cannot
+fix the race in an older 1.0.0.0 driver; use the full demo release's installer.
 
 While a source is preparing, Observe remains active and physical inputs pass
 through until it is ready. There is no fixed 30-second readiness deadline in
