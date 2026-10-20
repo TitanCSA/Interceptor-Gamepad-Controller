@@ -1,7 +1,14 @@
 # Input viewer diagnostics
 
-Use the [complete 1.0.4.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo),
-which includes both installers, viewer, console examples and SDK. Its kernel
+**Current preview:** [1.0.5.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo)
+contains Microsoft-signed kernel 1.0.3.0 and the unchanged 1.0.4.0 viewer / SDK.
+Real browser tests still fail with this kernel; a working viewer or native
+XInput reading does not establish browser compatibility. See
+[known issues and validation limits](KNOWN-ISSUES.md).
+
+The following sections document earlier releases and their bounded tests.
+The earlier [complete 1.0.4.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo)
+includes both installers, viewer, console examples and SDK. Its kernel
 remains Microsoft-signed version 1.0.2.0; the viewer/SDK are 1.0.4.0. Its native
 bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
 The Microsoft signature covers the driver package, not the application EXEs.
@@ -42,7 +49,7 @@ the specific physical controller shown in the report has not been tested here.
 ## Display responsiveness in viewer 1.0.3.0
 
 Download the [1.0.3.0 standalone viewer](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.3.0-viewer)
-for the latest display changes. The signed 1.0.2.0 driver remains current.
+for the display changes introduced in that release. Its signed driver is 1.0.2.0.
 The older complete 1.0.2.0 ZIP contains the preceding viewer.
 
 The native worker publishes changed state immediately after forwarding the

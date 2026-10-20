@@ -1,5 +1,13 @@
 # Interceptor Gamepad & Controller — Windows Kernel Filter Driver
 
+> **1.0.5.0 demo preview — Microsoft-signed kernel 1.0.3.0.**
+> This preview is **not a verified fix for the browser / Gamepad API issue**:
+> controlled Windows 11 tests still reproduced it. Read the
+> [known issues and validation limits](docs/KNOWN-ISSUES.md) before installing.
+> [Preview downloads](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo).
+> The default [latest release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)
+> remains 1.0.4.0; the browser issue was also reproduced with its kernel.
+
 **Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller,
 with a two-file C++17 SDK.**
 
@@ -11,7 +19,7 @@ See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
 · [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
 
-**[Complete 1.0.4.0 download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo):**
+**Earlier [complete 1.0.4.0 download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo):**
 fixes observation stopping with Windows error 21 while an opened HID,
 XInputHID or XUSB HID view is still preparing. Its source file stays open so
 the controller can join the same capture later; GIP and other ready sources
@@ -89,15 +97,19 @@ the demo time limit**, DM **`titancsa`** on Discord.
 
 ## Downloads and source
 
-All binaries and checksums are in [Releases](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest).
+Preview binaries and checksums are in the
+[1.0.5.0 prerelease](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo).
+The SDK and viewer remain version 1.0.4.0; the bundled kernel is 1.0.3.0.
 
 | File | Contents |
 | --- | --- |
 | `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
 | `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
 | `InterceptorExampleUI.exe` | Standalone input viewer |
-| `Interceptor-Gamepad-Controller-1.0.2.0-demo.zip` | Complete bundle: installers, console examples and viewer |
-| `Interceptor-Gamepad-Controller-1.0.2.0-demo-SDK.zip` | Two-file SDK and example source |
+| `Interceptor-Gamepad-Controller-1.0.5.0-demo.zip` | Complete bundle: installers, console examples and viewer |
+| `Interceptor-Gamepad-Controller-1.0.5.0-demo-SDK.zip` | Two-file SDK, example and installer source |
+| `Interceptor-Gamepad-Controller-1.0.5.0-Examples.zip` | Standalone viewer and console examples |
+| `SHA256SUMS.txt` | Download checksums |
 
 ```text
 Interceptor/       Interceptor.h + Interceptor.cpp; no SDK DLL required

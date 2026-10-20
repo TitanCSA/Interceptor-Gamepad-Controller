@@ -1,8 +1,11 @@
 # Installation, diagnostics and recovery
 
-The [1.0.2.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo)
-includes this edition's Microsoft-signed demo driver. The release
-installers work without enabling test signing or importing a development certificate.
+The [1.0.5.0 demo preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo)
+includes Microsoft-signed kernel 1.0.3.0 with the same two-hour allowance.
+It is **not a verified fix for the browser / Gamepad API issue**; read the
+[known issues](KNOWN-ISSUES.md) before installing. The default latest release
+remains 1.0.4.0 with kernel 1.0.2.0, which also reproduced that issue.
+Both packages work without enabling test signing or importing a development certificate.
 
 Use `InterceptorSetup.exe` or
 `InterceptorSetupConsole.exe /install`. Both use the same package and association
