@@ -5,6 +5,39 @@ which includes the Microsoft-signed driver and updated viewer. Its native
 bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
 The Microsoft signature covers the driver package, not the application EXEs.
 
+## Open source temporarily reports Windows error 21
+
+Use the [1.0.4.0 viewer and SDK update](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-viewer).
+The driver remains signed version 1.0.2.0. Replace the viewer EXE; applications
+using the SDK should rebuild with the updated `Interceptor.cpp` and header.
+
+The previous SDK closed an already-open collection file when its SOURCE query
+reported `ERROR_NOT_READY` (21). For HID and XInputHID this could discard the
+pending reader; for a mandatory XUSB HID view it aborted the entire all-family
+capture. Consequently, an error from an XUSB view could even stop the HID tab.
+
+The all-device context now retains these open HID, XInputHID and XUSB mirror
+files until capture ends. The kernel still decides when each source is actually
+ready and attaches it only then; an incomplete XUSB pair remains in passthrough.
+No fake ready state, repeated Observe clicks, source polling, sleep or capture
+restart is added. GIP has no user-mode source file and continues through the
+same all-family context while other sources prepare.
+
+Only a temporarily unready, successfully opened collection uses this behavior.
+Access denied, an unsupported mandatory mirror, trial expiry and other failures
+still retain their exact diagnostic and release all acquired files. A native
+XUSB parent's SOURCE response completes its bootstrap handshake, so its failure
+is still reported rather than hidden as collection preparation. An unsuccessful
+CreateFile does not provide a file that can be retained. This change does not
+make unsupported profiles capturable or certify every physical controller.
+
+The actual SDK passes 1,210,681 checks in Release and again with AddressSanitizer,
+including 10,000 pending-source lifecycles, late HID/XUSB/XInputHID inputs,
+concurrent GIP forwarding, exact cleanup, real errors and the two-hour limit.
+The previous SDK fails the same fixture with the reported mandatory HID mirror
+SOURCE / Win32 21 error. These injected I/O tests do not access host devices;
+the specific physical controller shown in the report has not been tested here.
+
 ## Display responsiveness in viewer 1.0.3.0
 
 Download the [1.0.3.0 standalone viewer](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.3.0-viewer)

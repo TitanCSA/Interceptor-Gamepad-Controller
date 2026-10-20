@@ -454,18 +454,24 @@ SourceHandles OpenControllerSources(std::uint8_t controllers,bool availableOnly=
             }
             try {Io(source->value,sourceIoctls[native],nullptr,0,nullptr,0);}
             catch(const std::system_error& error) {
-                // Collection filters explicitly report transparent unsupported
-                // profiles. They must not disable capture of other supported
-                // HID/XInputHID devices. Keep other failures visible, and never
-                // omit a native XUSB mirror required for complete isolation.
+                // An open collection file is also the shared reader's lifetime.
+                // In CREATE_ALL, a temporarily unready HID/XInputHID collection
+                // or XUSB mirror must stay OPEN so D0/reader preparation can
+                // attach it later. Returning an empty set or throwing here
+                // closes that file and prevents the pending reader progressing.
+                // CREATE_ALL still gates capture on the driver's actual ready
+                // state; retaining the file does not claim complete isolation.
                 const auto code=static_cast<DWORD>(error.code().value());
                 const bool optionalHid=native==0 || native==2;
+                if(availableOnly && native!=1 && code==ERROR_NOT_READY) {
+                    sources.push_back(std::move(source));continue;
+                }
                 if(optionalHid && code==ERROR_NOT_SUPPORTED)continue;
-                if(availableOnly && (code==ERROR_DEVICE_NOT_CONNECTED ||
-                    (optionalHid && code==ERROR_NOT_READY)))continue;
-                // CREATE_ALL can reserve an absent/pending family, but closing
-                // its failed native source would stop the reader permanently.
-                // Report startup failure instead of a valid, empty context.
+                if(availableOnly && code==ERROR_DEVICE_NOT_CONNECTED)continue;
+                // A native parent's SOURCE query completes its bootstrap/arm
+                // handshake, so its failures remain fatal, including NOT_READY.
+                // Access, unsupported mirror and other real failures also keep
+                // their exact operation/error and roll back the partial set.
                 sourceFailure(native,"start controller source (SOURCE IOCTL)",code);
             }
             sources.push_back(std::move(source));
