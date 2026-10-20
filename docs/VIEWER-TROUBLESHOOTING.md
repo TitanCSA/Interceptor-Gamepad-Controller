@@ -1,7 +1,8 @@
 # Input viewer diagnostics
 
-Use the [1.0.2.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo),
-which includes the Microsoft-signed driver and updated viewer. Its native
+Use the [complete 1.0.4.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo),
+which includes both installers, viewer, console examples and SDK. Its kernel
+remains Microsoft-signed version 1.0.2.0; the viewer/SDK are 1.0.4.0. Its native
 bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
 The Microsoft signature covers the driver package, not the application EXEs.
 

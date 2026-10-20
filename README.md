@@ -11,11 +11,13 @@ See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
 · [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
 
-**[Viewer and SDK 1.0.4.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-viewer):**
+**[Complete 1.0.4.0 download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo):**
 fixes observation stopping with Windows error 21 while an opened HID,
 XInputHID or XUSB HID view is still preparing. Its source file stays open so
 the controller can join the same capture later; GIP and other ready sources
-continue working. Includes updated console examples and the two-file SDK.
+continue working. Includes both installers, the viewer, updated console examples,
+the two-file SDK and a complete ZIP in this release, including unchanged driver
+files so no older release needs searching.
 The display keeps the 1.0.3.0 improvements, with no fixed application FPS limit.
 Uses the signed 1.0.2.0 driver; no reinstall is needed if it is already installed.
 
