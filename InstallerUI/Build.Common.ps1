@@ -59,6 +59,7 @@ function New-InstallerPackage([string]$IntermediateDirectory,[string]$NativeDire
     foreach($name in $recoveryNames){Copy-Item -LiteralPath (Join-Path $sourceRecovery $name) -Destination $recovery}
     . (Join-Path $package 'Common.ps1')
     $signingMode=Assert-InterceptorPayload $payload -AllowDevelopment
+    Assert-InterceptorUsbPackage $payload
     if($signingMode -notin @('Microsoft','Development')){throw 'Unsupported product package signing mode.'}
     foreach($name in $recoveryNames){Assert-InstallerFile (Join-Path $recovery $name) $recoveryHashes[$name]|Out-Null}
     $selected=@($engineNames)+@($driverNames|ForEach-Object {'Payload/'+$_})+@('Payload/InterceptorExample.exe','Payload/SHA256.json')+@($recoveryNames|ForEach-Object {'Recovery/'+$_})

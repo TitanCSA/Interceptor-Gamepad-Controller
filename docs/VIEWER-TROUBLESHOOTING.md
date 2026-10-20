@@ -1,182 +1,62 @@
 # Input viewer diagnostics
 
-**Current preview:** [1.0.5.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo)
-contains Microsoft-signed kernel 1.0.3.0 and the unchanged 1.0.4.0 viewer / SDK.
-Real browser tests still fail with this kernel; a working viewer or native
-XInput reading does not establish browser compatibility. See
-[known issues and validation limits](KNOWN-ISSUES.md).
+Use the [complete 1.0.6.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo),
+which includes signed kernel **1.0.4.0** and user-mode applications rebuilt with the updated SDK.
+The native bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL is needed.
+Use this release's installer to update the kernel, then finish all requested restart/reopen steps.
+Use its rebuilt viewer and rebuild custom clients with the supplied `Interceptor.h` and `Interceptor.cpp`.
+Wire ABI 4 is retained, but an older compiled client's legacy XUSB SOURCE/mirror startup path can still fail with the new backend.
 
-The following sections document earlier releases and their bounded tests.
-The earlier [complete 1.0.4.0 demo release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo)
-includes both installers, viewer, console examples and SDK. Its kernel
-remains Microsoft-signed version 1.0.2.0; the viewer/SDK are 1.0.4.0. Its native
-bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL needs copying.
-The Microsoft signature covers the driver package, not the application EXEs.
+## Observe once
 
-## Open source temporarily reports Windows error 21
+Run the viewer as administrator, select a family and click **Observe** once.
+**XInput / XUSB** is the native Xbox 360-style transport; **XInputHID** is a separate HID-backed family.
+The SDK creates and reuses its all-device capture automatically; the selected tab controls what the viewer displays.
+Keyboard activity and repeated Observe clicks are not required.
 
-Use the [1.0.4.0 viewer and SDK update](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-viewer).
-The driver remains signed version 1.0.2.0. Replace the viewer EXE; applications
-using the SDK should rebuild with the updated `Interceptor.cpp` and header.
+Sources still enumerating can join capture when ready.
+For the USB XUSB backend, discovery uses the central driver endpoint and does not depend on the former native-source or secondary-HID-mirror opening handshake.
+HID and XInputHID collections can still need their own descriptor/reader preparation.
+An unsupported format remains unsupported; the viewer does not invent a ready state or fake input.
 
-The previous SDK closed an already-open collection file when its SOURCE query
-reported `ERROR_NOT_READY` (21). For HID and XInputHID this could discard the
-pending reader; for a mandatory XUSB HID view it aborted the entire all-family
-capture. Consequently, an error from an XUSB view could even stop the HID tab.
+If input remains invisible, check **Diagnose**, the family/transport, the installed kernel version and whether another application owns capture.
+Then compare the same device in the affected consumer, such as the browser or `joy.cpl`.
+A working SDK viewer alone does not prove that every Windows consumer receives correct input.
+[Compatibility](COMPATIBILITY.md) · [validated scenarios](KNOWN-ISSUES.md).
 
-The all-device context now retains these open HID, XInputHID and XUSB mirror
-files until capture ends. The kernel still decides when each source is actually
-ready and attaches it only then; an incomplete XUSB pair remains in passthrough.
-No fake ready state, repeated Observe clicks, source polling, sleep or capture
-restart is added. GIP has no user-mode source file and continues through the
-same all-family context while other sources prepare.
+## Automatic-stop report
 
-Only a temporarily unready, successfully opened collection uses this behavior.
-Access denied, an unsupported mandatory mirror, trial expiry and other failures
-still retain their exact diagnostic and release all acquired files. A native
-XUSB parent's SOURCE response completes its bootstrap handshake, so its failure
-is still reported rather than hidden as collection preparation. An unsuccessful
-CreateFile does not provide a file that can be retained. This change does not
-make unsupported profiles capturable or certify every physical controller.
+When observation ends unexpectedly, **Copy diagnostic** retains:
 
-The actual SDK passes 1,210,681 checks in Release and again with AddressSanitizer,
-including 10,000 pending-source lifecycles, late HID/XUSB/XInputHID inputs,
-concurrent GIP forwarding, exact cleanup, real errors and the two-hour limit.
-The previous SDK fails the same fixture with the reported mandatory HID mirror
-SOURCE / Win32 21 error. These injected I/O tests do not access host devices;
-the specific physical controller shown in the report has not been tested here.
+- The failed stage: initialization, context creation, enumeration, wait, receive, forwarding or display decoding.
+- The family, device and sequence when known; unavailable information is identified explicitly.
+- The Windows error in decimal/hexadecimal, its explanation and native exception text.
+- Received/forwarded totals and, on send failure, the accepted prefix and unsent suffix.
+- Context/readiness information and the last driver reset reason.
 
-## Display responsiveness in viewer 1.0.3.0
+A wait failure alone does not identify the responsible physical device, and a historical reset reason can predate the current capture.
+Copy the complete report before starting another observation, which clears the previous failure.
+Remove serial numbers and personal identifiers before publishing it.
 
-Download the [1.0.3.0 standalone viewer](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.3.0-viewer)
-for the display changes introduced in that release. Its signed driver is 1.0.2.0.
-The older complete 1.0.2.0 ZIP contains the preceding viewer.
+## Browser, game-controller panel or Search problems
 
-The native worker publishes changed state immediately after forwarding the
-received batch. The two former 33 ms display waits are removed. The UI requests
-one WPF rendering callback and reads the newest snapshot just before rendering;
-notifications arriving before that frame are coalesced. A final change during
-snapshot acknowledgement can request the following frame. The callback is
-unsubscribed after delivery and on close, so an idle viewer has no permanent
-rendering callback, display timer or busy loop.
+The legacy upper XUSB backend in kernels 1.0.2.0/1.0.3.0 could break native Windows consumer behavior even with no active SDK capture.
+The 1.0.4.0 USB lower backend leaves native request validation, foreground policy and HID translation to Windows.
+Upgrade the installed driver, not only this EXE; an upgrade can require two normal restarts with the same installer reopened after each request.
 
-There is no fixed application FPS cap. Actual visible updates depend on WPF,
-Windows, the graphics system and the display. This does not promise zero
-end-to-end latency or make the hardware produce more reports. Forwarding remains
-before display decoding; the inputs counter measures reports, not presented FPS.
+Controlled Windows 11 tests passed the real default browser Gamepad API, actual `joy.cpl` tester screens and a real Search mouse click opening Notepad.
+Independent Windows.Gaming.Input readings also verified idle modifications and restoration after normal close and abrupt termination.
+The user's physical-controller and Windows 10 Search cases remain to be checked on that machine.
+Windows foreground/background input policy still applies. [Detailed scope](KNOWN-ISSUES.md).
 
-Offline tests cover immediate final-state publication across 10,000 sessions,
-preserved forwarding and diagnostic behavior, bounded notifications, updates
-arriving during a frame read, disposal and dispatcher shutdown. Release and
-AddressSanitizer native fixtures each pass 120,291 checks; managed scheduler
-fixtures pass 60,019 checks. These are software tests, not physical latency or
-monitor-refresh measurements.
+## Display cadence
 
-Click **Observe** once in the required tab. **XInput / XUSB** covers the native
-Xbox 360 transport; **XInputHID** is a different input family. Keyboard activity
-is not required by either one.
+There is no fixed application FPS cap or permanent display timer.
+The native worker forwards a received batch before decoding display data, publishes the latest state and requests a WPF rendering callback.
+Notifications are coalesced so the UI displays current state without queuing old frames; the callback is removed when no update remains.
 
-If observation ends automatically, the window retains the diagnostic and shows
-**Copy diagnostic**. The report includes:
+Visible cadence still depends on controller report rate, Windows, WPF, graphics and the screen.
+The input counter counts reports, not displayed frames.
+Compatibility tests do not measure physical end-to-end latency or promise zero delay.
 
-- The failed operation: initialization, context creation, enumeration, input
-  wait, input read, unchanged forwarding or display decoding.
-- The actual family, device ID and sequence when the operation identifies
-  them; otherwise they are explicitly unknown.
-- The Windows error in decimal and hexadecimal, its Windows explanation and
-  the native exception message.
-- For forwarding errors, the received batch, accepted prefix and unsent suffix.
-  Read buffer capacity is reported separately from received inputs.
-- Received/forwarded totals, context generation, ready mask and the last
-  reset reason reported by the driver.
-
-A wait failure does not identify which physical device caused a reset. The
-last reset reason can also belong to an earlier context. Copy the whole report
-when reporting an issue; a new observation clears the previous failure.
-
-## XUSB preparation issue
-
-A kernel race was identified in the original 1.0.0.0 driver: a native XUSB
-report could arrive before its translated HID view became capturable. The
-all-device context treated the still-unattached source as a device change and
-revoked capture. Keyboard activity could change timing but is not a solution.
-
-The fix introduced in signed driver 1.0.1.0 and retained in 1.0.2.0 keeps that
-source in normal passthrough until it can join the context. Attached-device
-failures and queue overflow still release capture. Packet formats and the
-two-hour demo are unchanged.
-
-Download the new **InterceptorSetup.exe** and choose **Install / reinstall**,
-or run the new **InterceptorSetupConsole.exe /install**. Use Windows **Restart**
-when requested, then reopen the installer or rerun `/install` to finish device
-associations. Console exit code `3010` means a restart is required.
-
-The earlier [1.0.1.0 viewer-only release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-viewer)
-added diagnostics without replacing the installed driver. Its EXE alone cannot
-fix the race in an older 1.0.0.0 driver; use the full demo release's installer.
-
-While a source is preparing, Observe remains active and physical inputs pass
-through until it is ready. There is no fixed 30-second readiness deadline in
-the all-device context. An unsupported secondary HID profile is not made
-compatible by this change; support depends on the Windows stack and descriptor.
-
-## Idle XUSB startup follow-up
-
-The 1.0.2.0 SDK and viewer report native XUSB source-opening failures with
-their exact operation, input family and Windows error. The SDK no longer
-silently discards a registered native source and leaves an empty observation
-running when that source fails to start. Unsupported transparent generic
-HID/XInputHID collections remain omitted; failures of a mandatory XUSB mirror
-are reported. Interfaces that actually disappear keep their normal behavior.
-
-The signed 1.0.2.0 kernel also initializes the reader from
-Windows' cached unfiltered physical state, then arms ordinary input reception
-before declaring the source ready. It does not insert a fake input into the
-capture queue or poll the controller. **Use the full 1.0.2.0 release's installer
-to update the kernel; the viewer EXE alone does not replace an installed driver.**
-The earlier [1.0.2.0 viewer-only preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-viewer)
-was published while kernel signing was pending and is now superseded by the full
-signed package. Earlier release downloads remain unchanged.
-
-The reported physical-controller failure has not been reproduced with the
-virtual Xbox 360 used in the Windows 11 lab: the signed 1.0.1.0 baseline already
-passes six idle Observe starts, three untouched seconds and one delayed report
-per cycle. Consequently, passing that virtual-device test alone does not
-establish that the physical-controller issue is resolved. Deterministic tests
-exercise actual startup/source-opening code, including the formerly silent
-failure path, cancellation, malformed responses and repeated restarts.
-
-The tested 1.0.2.0 candidate underlying the signed package and the viewer also
-pass six such Windows 11 VM cycles: metadata is visible before stimulation,
-each startup has three untouched seconds, then one report is received and
-forwarded unchanged. No report submission or independent XInput read helps
-discovery during startup.
-The actual kernel startup bodies pass 760,764 deterministic checks and 10,000
-restart cycles in both Release and AddressSanitizer builds. The SDK source-open
-tests pass 123 checks and reject the former silent-failure implementation.
-
-## Earlier release validation
-
-The regression harness compiles the actual kernel reader and dequeue functions
-with deterministic WDF/mirror boundaries. It covers pending sources, first
-eligible attachment, ring wrap, partial dequeue, event reset/rearming, overflow,
-fixed snapshots and attached-device failures. Restoring the old reader must
-fail the pending-source test. Strict Release and matched AddressSanitizer runs
-pass 180,139 checks over 10,000 cycles.
-
-Viewer builds use warnings as errors. Offline tests verify native/managed ABI
-sizes, automatic-stop presentation, partial forwarding, read-capacity wording,
-complete reports and concurrent bridge disposal. More than 400 native assertions
-pass in each Release and AddressSanitizer run, including publication of a final
-input after a quiet wait, without another input to wake the viewer.
-
-A dedicated Windows 11 VM exercised the earlier 1.0.1.0 candidate and its
-published native bridge with one virtual Xbox 360 source: 12 Observe/Stop cycles,
-192 exact button/axis/trigger states checked against an independent XInput consumer,
-and 230 inputs received and forwarded unchanged. No keyboard or mouse input
-was used. The exact published EXE passed its embedded-bridge/UI self-tests in
-the same VM. Installation, associations and lab changes were restored, followed
-by a normal Windows shutdown.
-
-These bounded tests do not establish support for every physical controller.
-Kernel source and signing material are not included here.
+Historical viewer-only releases remain downloadable, but their EXEs cannot update an older installed kernel.

@@ -1,63 +1,30 @@
 # Interceptor Gamepad & Controller — Windows Kernel Filter Driver
 
-> **1.0.5.0 demo preview — Microsoft-signed kernel 1.0.3.0.**
-> This preview is **not a verified fix for the browser / Gamepad API issue**:
-> controlled Windows 11 tests still reproduced it. Read the
-> [known issues and validation limits](docs/KNOWN-ISSUES.md) before installing.
-> [Preview downloads](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo).
-> The default [latest release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)
-> remains 1.0.4.0; the browser issue was also reproduced with its kernel.
+**Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller input, with a two-file C++17 SDK.**
 
-**Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller,
-with a two-file C++17 SDK.**
+> **[1.0.6.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo) · signed kernel 1.0.4.0.**
+> Native XUSB interception now runs below the Windows function driver, preserving its input-consumer behavior.
+> Real browser, Windows game-controller panel and Search tests passed with controlled Windows 11 virtual devices. [Validation and remaining limits](docs/KNOWN-ISSUES.md).
 
-Receive physical input, identify its source, read or change it, then forward it
-to Windows through one API. Windows 10 1709+ / Windows 11 **x64**; administrator
-rights are required for installation and capture. Compatible USB profiles include **DualShock 4 (DS4 / PS4), DualSense (PS5), wired Xbox 360, Xbox One and Xbox Series X|S**. Connection, descriptor and protocol determine support; a model name alone is not a promise for every firmware or wireless mode.
-See [compatibility](docs/COMPATIBILITY.md) for supported profiles and limits.
+Receive input, identify its source, read or change it, then forward it through one API.
+Windows 10 1709+ / Windows 11 **x64**; installation and capture require administrator rights.
+Compatible USB profiles include **DualShock 4 (DS4 / PS4), DualSense (PS5), wired Xbox 360, Xbox One and Xbox Series X|S**.
+Connection, descriptor and protocol determine support; a model name does not certify every firmware or wireless mode.
 
-**[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md)
-· [C++ API](docs/API.md) · [Examples](ExamplesConsole/README.md)
-
-**Earlier [complete 1.0.4.0 download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.4.0-demo):**
-fixes observation stopping with Windows error 21 while an opened HID,
-XInputHID or XUSB HID view is still preparing. Its source file stays open so
-the controller can join the same capture later; GIP and other ready sources
-continue working. Includes both installers, the viewer, updated console examples,
-the two-file SDK and a complete ZIP in this release, including unchanged driver
-files so no older release needs searching.
-The display keeps the 1.0.3.0 improvements, with no fixed application FPS limit.
-Uses the signed 1.0.2.0 driver; no reinstall is needed if it is already installed.
-
-**[1.0.2.0 demo update](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-demo):**
-the Microsoft-signed driver initializes XUSB from its cached physical state
-before arming input reception. Native startup failures now include their
-operation and Windows error, with **Copy diagnostic** in the viewer.
-Upgrade with this release's UI or console installer and use Windows **Restart**
-if requested; replacing the viewer EXE alone does not update an older driver.
-[Details and troubleshooting](docs/VIEWER-TROUBLESHOOTING.md).
-
-The full 1.0.2.0 package supersedes the
-[viewer-only preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.2.0-viewer)
-and [1.0.1.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.1.0-demo).
-Their downloads remain available unchanged.
+**[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md) · [C++ API](docs/API.md) · [Compatibility](docs/COMPATIBILITY.md) · [Examples](ExamplesConsole/README.md)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
 | ![Product-specific installer](docs/images/installer.png) | ![Input viewer with simulated input](docs/images/viewer.png) |
 
-Images illustrate the interface; the viewer uses simulated input and is not a
-physical-device compatibility test. See release notes for validation details.
+Images illustrate the interface; simulated viewer input is not a physical-device test.
 
 ## Quick start
 
-1. Download this edition's **InterceptorSetup.exe**, run it and accept elevation.
-2. Click **Install / reinstall**. If requested, use Windows **Restart**, then
-   reopen the same installer to finish device associations.
-3. Run **InterceptorExampleUI.exe** as administrator and click **Observe**.
-   **Stop** releases capture. Close other capture applications first.
-4. Use **Diagnose** for per-device installation/API checks and copyable reports.
-   Input features that cannot be exercised automatically remain **unverified**.
+1. Run this release's **InterceptorSetup.exe**, accept elevation, then click **Install / reinstall**.
+2. If requested, use Windows **Restart** and reopen the same installer. Upgrading the legacy XUSB backend can require **two restarts**: one to load the new driver, then one to load migrated controller filters. Continue until no restart is requested.
+3. Run **InterceptorExampleUI.exe** as administrator and click **Observe** once. **Stop** releases capture; close other capture applications first.
+4. **Diagnose** provides per-device installation/API checks and a copyable report. Physical features not exercised automatically remain **unverified**.
 
 The console installer uses the same installation engine:
 
@@ -66,55 +33,43 @@ The console installer uses the same installation engine:
 .\InterceptorSetupConsole.exe /uninstall
 ```
 
-Exit code `3010` means a restart is required; after installing, rerun `/install`
-after that restart. The Microsoft signature covers the driver package, not the
-installer or example EXEs. [Installation and recovery](docs/INSTALLATION.md).
+Exit code `3010` requests a restart; rerun `/install` afterward. Replacing only the viewer EXE does not upgrade the driver.
+The Microsoft signature covers the driver package, not the installer or example EXEs. [Recovery and troubleshooting](docs/INSTALLATION.md).
 
-## Separate editions
+## What changed
 
-This repository handles **HID, XInput / XUSB, XInputHID and GIP gamepad / controller input only**. The companion
-[Interceptor-Keyboard-Mouse](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse) handles the other input families.
-The two editions have separate driver services, device associations, recovery
-state and demo allowances, and can run side by side. Each application must use
-the SDK for its installed edition. Do not link both alternative SDKs together.
+Kernel **1.0.4.0** replaces the legacy XUSB upper backend with a USB lower filter.
+Windows keeps ownership of native XInput / Windows.Gaming.Input requests, foreground policy and translated HID views.
+The SDK discovers XUSB through the central endpoint, without requiring the former native-source or secondary-HID-mirror startup handshake.
+The installers migrate only this product's legacy associations and preserve pending work until the expected backend is loaded.
+All supplied user-mode applications are rebuilt with the updated SDK.
+Rebuild custom applications with this release's **Interceptor.h + Interceptor.cpp**.
+Wire ABI 4 is retained, but older compiled clients can still attempt the obsolete XUSB source/mirror startup path.
 
-The original [Interceptor](https://github.com/TitanCSA/Interceptor) combines both
-groups. Remove an overlapping original Interceptor installation before using a
-split edition; the installers refuse conflicting filter stacking and do not
-uninstall another product automatically.
-
-## Two-hour demo
-
-**Two hours per Windows boot**, starting with the first successful capture,
-shared by all applications using this edition. Sleep time counts. Closing an
-application, uninstalling or reinstalling does not reset the current allowance.
-Diagnostics that create a capture can start it.
-
-At expiry, captures are revoked, new capture/injection is refused, and physical
-input continues normally. Use Windows **Restart** for another allowance; Fast
-Startup shutdown does not reset the kernel boot. For the **full version without
-the demo time limit**, DM **`titancsa`** on Discord.
+Validation used real Windows consumers, including the default browser Gamepad API, actual `joy.cpl` tester windows and a real Search mouse click.
+Independent Windows.Gaming.Input readings also confirmed modified XUSB/GIP inputs sent during quiet periods and restoration after normal close and abrupt client termination.
+These are bounded Windows 11 virtual-device tests. The reported physical-controller and Windows 10 Search cases still require verification on that hardware.
+[Details](docs/KNOWN-ISSUES.md).
 
 ## Downloads and source
 
-Preview binaries and checksums are in the
-[1.0.5.0 prerelease](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo).
-The SDK and viewer remain version 1.0.4.0; the bundled kernel is 1.0.3.0.
+The [complete 1.0.6.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
+Bundle version **1.0.6.0** contains kernel **1.0.4.0** and the updated two-file SDK.
 
 | File | Contents |
 | --- | --- |
 | `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
 | `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
-| `InterceptorExampleUI.exe` | Standalone input viewer |
-| `Interceptor-Gamepad-Controller-1.0.5.0-demo.zip` | Complete bundle: installers, console examples and viewer |
-| `Interceptor-Gamepad-Controller-1.0.5.0-demo-SDK.zip` | Two-file SDK, example and installer source |
-| `Interceptor-Gamepad-Controller-1.0.5.0-Examples.zip` | Standalone viewer and console examples |
+| `InterceptorExampleUI.exe` | Standalone input viewer with embedded bridge |
+| `Interceptor-Gamepad-Controller-1.0.6.0-demo.zip` | Complete installers, viewer and console examples |
+| `Interceptor-Gamepad-Controller-1.0.6.0-demo-SDK.zip` | SDK, example and installer source |
+| `Interceptor-Gamepad-Controller-1.0.6.0-Examples.zip` | Viewer and console examples |
 | `SHA256SUMS.txt` | Download checksums |
 
 ```text
 Interceptor/       Interceptor.h + Interceptor.cpp; no SDK DLL required
 ExamplesConsole/   Controller pass-through and descriptor-decoded HID axis inversion
-ExamplesUI/        Graphical viewer for this edition's input families
+ExamplesUI/        Graphical input viewer
 InstallerConsole/  Console installer
 InstallerUI/       UI, shared installation engine and precompiled driver/recovery
 docs/              API, installation, compatibility and images
@@ -122,18 +77,28 @@ licenses/          Driver binary terms and attribution
 ```
 
 With Visual Studio 2022 C++ tools, a Windows SDK and CMake installed, run
-`powershell -ExecutionPolicy Bypass -File .\Build.ps1` to build the user-mode
-applications. Builds embed the supplied signed driver and precompiled recovery
-binaries. **Kernel source and private signing material are not included.**
-[Build instructions](docs/BUILD.md). User-mode source is [MIT](LICENSE); the
-demo driver has [separate terms](licenses/BINARY-LICENSE.txt).
+`powershell -ExecutionPolicy Bypass -File .\Build.ps1` to build user-mode applications.
+Builds embed the supplied signed driver and precompiled recovery binaries.
+**Kernel source and private signing material are not included.**
+[Build instructions](docs/BUILD.md). User-mode source is [MIT](LICENSE); the demo driver has [separate terms](licenses/BINARY-LICENSE.txt).
+
+## Two-hour demo
+
+**Two hours per Windows boot**, starting with the first successful capture, shared across this edition's applications.
+Sleep time counts. Closing applications, uninstalling or reinstalling does not reset the allowance; diagnostics that create a capture can start it.
+At expiry, captures are revoked, new capture/injection is refused, and physical input continues normally.
+Use Windows **Restart** for a new allowance; Fast Startup shutdown does not reset the kernel boot.
+For the **full version without the demo time limit**, DM **`titancsa`** on Discord.
+
+## Separate editions and attribution
+
+This edition handles **gamepad/controller input only**. [Interceptor-Keyboard-Mouse](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse) has its own service, associations, recovery state and demo allowance; the two editions can coexist.
+Use each edition's own SDK. Remove an overlapping original [Interceptor](https://github.com/TitanCSA/Interceptor) installation first; the split installers refuse conflicting stacking and do not uninstall another product automatically.
 
 This independent project evolves the input-interception workflow popularized by
-[oblitum's Interception](https://github.com/oblitum/Interception), with its own
-implementation and API. It is not affiliated with oblitum or ABI-compatible with
-the original. See [attribution](licenses/NOTICE). For a bug report, include the
-release, Windows build, VID/PID, connection type and a diagnostic report with
-personal identifiers removed.
+[oblitum's Interception](https://github.com/oblitum/Interception), with its own implementation and API.
+It is not affiliated with oblitum or ABI-compatible with the original. See [attribution](licenses/NOTICE).
+For a bug report, include the release, installed driver version, Windows build, VID/PID, connection type and affected consumer; remove personal identifiers from diagnostic exports.
 
 ## Minimal example: receive, read, forward
 

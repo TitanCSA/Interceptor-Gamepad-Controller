@@ -75,11 +75,16 @@ namespace InterceptorSetup {
    string path=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),@"InterceptorGamepadController\state.json");
    if(!File.Exists(path))return false;
    var state=Json.Deserialize<Dictionary<string,object>>(File.ReadAllText(path,Encoding.UTF8));
+   return PendingControllerAssociation(state,Convert.ToString(Manifest()["Payload/InterceptorGamepadController.sys"]));
+  }
+  internal static bool PendingControllerAssociation(Dictionary<string,object> state,string expectedHash) {
    object value;if(state==null||!state.TryGetValue("Schema",out value)||Convert.ToInt32(value)!=1)return false;
    if(state.TryGetValue("PendingUninstall",out value)&&Convert.ToBoolean(value))return false;
    if(!state.TryGetValue("ControllerAssociation",out value))return false;
-   var pending=value as Dictionary<string,object>;object enabled,hash;
-   return pending!=null&&pending.TryGetValue("Pending",out enabled)&&Convert.ToBoolean(enabled)&&pending.TryGetValue("DriverSHA256",out hash)&&string.Equals(Convert.ToString(hash),Convert.ToString(Manifest()["Payload/InterceptorGamepadController.sys"]),StringComparison.OrdinalIgnoreCase);
+   var pending=value as Dictionary<string,object>;object enabled,hash,verified;
+   if(pending==null||!pending.TryGetValue("DriverSHA256",out hash)||!string.Equals(Convert.ToString(hash),expectedHash,StringComparison.OrdinalIgnoreCase))return false;
+   return (pending.TryGetValue("Pending",out enabled)&&Convert.ToBoolean(enabled))||
+     !pending.TryGetValue("UsbMigrationVerified",out verified)||!Convert.ToBoolean(verified);
   }
  }
 }

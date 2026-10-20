@@ -1,31 +1,40 @@
 # Gamepad and controller compatibility
 
-This edition captures **controller input only**: HID game controllers,
-XInput/XUSB, XInputHID and GIP. There is no keyboard/mouse injection API or
-keyboard/mouse mapper. The driver leaves excluded stacks in passthrough.
+This edition captures **controller input only**: HID game controllers, XInput/XUSB, XInputHID and GIP.
+It has no keyboard/mouse injection API or keyboard/mouse mapper; excluded stacks remain in passthrough.
 
 | Family | Supported approach | Limits |
 | --- | --- | --- |
-| HID gamepad / joystick | Descriptor-driven decoding and re-encoding; dynamic axes, triggers, hats, buttons and other declared values | Proprietary meanings and malformed descriptors cannot be inferred |
-| XInput / XUSB | Supported wired Xbox 360-style USB transport profiles | Not an `XInputGetState` hook or every adapter/proprietary wireless protocol |
-| XInputHID | Supported Windows controller HID collection and source association | Collection/connection must expose the expected profile |
-| GIP | Validated controller metadata and complete input frames, including supported extended frames | No firmware/authentication/audio command injection; unsupported formats are explicit |
+| HID gamepad / joystick | Descriptor-driven decoding and re-encoding; dynamic axes, triggers, hats, buttons and other declared values | Proprietary meanings and malformed descriptors cannot be inferred. |
+| XInput / XUSB | Supported wired Xbox 360-style USB profiles; kernel 1.0.4.0 filters below `xusb22` | Windows retains native input-consumer policy and HID translation. This does not cover every adapter, wireless receiver or proprietary protocol. |
+| XInputHID | Supported Windows controller HID collection and source association | The collection and connection must expose the expected profile. This is a separate family from native XUSB. |
+| GIP | Validated metadata and supported complete input frames, including extended input frames | No firmware, authentication or audio command injection; unsupported formats remain explicit. |
 
-Compatible profiles can include DS4 / DualShock 4 (PS4), DualSense (PS5), wired
-Xbox 360, Xbox One and Xbox Series X|S. A model name alone is not evidence that
-every firmware, Bluetooth mode, wireless adapter or vendor feature is supported.
-The source descriptor/protocol and connection determine compatibility.
+Compatible USB profiles can include **DS4 / DualShock 4 (PS4), DualSense (PS5), wired Xbox 360, Xbox One and Xbox Series X|S**.
+A model name alone does not establish support for every firmware, Bluetooth connection, wireless adapter or vendor feature.
+The actual descriptor, transport and Windows stack determine compatibility.
 
-For HID and XInputHID, `input.state` describes the current report. Repeated X axes
-remain separate fields with report/collection identity; no control is collapsed
-solely because it shares a usage name. Check decoding flags before relying on
-normalized values. Standard XUSB and GIP native states have their own layouts and
-trigger/button ranges; they are not interchangeable binary structures.
+## Input state
 
-An attached filter is not proof of physical capture. A device can be preparing
-while Windows completes enumeration. Capture creation accepts future sources;
-it does not require moving a stick at the instant you start. Diagnostics distinguish
-absent, preparing, unsupported, unavailable and ready sources.
+For HID and XInputHID, `input.state` describes the current report.
+Repeated X axes remain separate fields with their report/collection identity; controls are not collapsed merely because they share a usage name.
+Check decoding flags before relying on normalized values.
+Standard XUSB and GIP states have their own layouts and trigger/button ranges; they are not interchangeable binary structures.
 
-Original Interceptor must be removed from an overlapping controller stack before
-association. The separate keyboard/mouse edition can remain installed.
+`Send_Input` selects the input family and source automatically.
+The current XUSB USB backend feeds modified reports through the native Windows translator, so its Windows-facing views follow the same transport state.
+Windows still decides whether a particular consumer is entitled to foreground/background input.
+
+## Readiness and validation
+
+An attached filter is not proof of physical capture. A source can be preparing while Windows enumerates and configures it.
+The all-device capture accepts future ready sources; moving a stick at the exact moment of **Observe** is not a required startup gesture.
+Diagnostics distinguish absent, preparing, unsupported, unavailable and ready sources.
+XUSB discovery in the updated SDK uses the central driver endpoint and does not require opening the former secondary HID mirror.
+Rebuild custom clients with the current two-file SDK: preserving wire ABI 4 does not make their older XUSB SOURCE/mirror startup sequence suitable for this backend.
+
+Windows 11 tests with controlled virtual XUSB/GIP devices verified real browser input, actual `joy.cpl` tester screens, independent modified-input readings and physical-state restoration after capture close or client termination.
+Those tests do not certify every physical device or the user's Windows 10 machine. [Validation details](KNOWN-ISSUES.md).
+
+Remove original Interceptor from an overlapping controller stack before association.
+The separate keyboard/mouse edition can remain installed.

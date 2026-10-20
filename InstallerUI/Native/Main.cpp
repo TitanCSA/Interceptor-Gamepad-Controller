@@ -7,10 +7,38 @@
 
 int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew=false,const wchar_t* mouseInf=nullptr,const wchar_t* controlInf=nullptr);
 int ConfigureControlDriver(const wchar_t* inf,bool remove);
+namespace {
+bool UsbXusbBackendLoaded(const IC_CAPABILITIES& capabilities) {
+    return (capabilities.controller_mask&IC_CONTROLLER_XUSB)!=0 &&
+        (capabilities.xusb_profiles&4u)!=0 && (capabilities.xusb_profiles&3u)!=0;
+}
+int SetupPolicySelfTest() {
+    struct Case {unsigned controllers,profiles;bool expected;};
+    constexpr Case cases[]={{2,3,false},{2,7,true},{2,6,true},{0,7,false},{2,4,false},{2,0,false},{15,7,true}};
+    for(const auto& test:cases) {
+        IC_CAPABILITIES capabilities{};capabilities.controller_mask=test.controllers;capabilities.xusb_profiles=test.profiles;
+        if(UsbXusbBackendLoaded(capabilities)!=test.expected)throw std::runtime_error("Installer USB backend policy test failed");
+    }
+    std::cout<<"Installer backend policy: 7 cases passed; no driver opened or installation performed.\n";
+    return 0;
+}
+}
 int wmain(int argc,wchar_t** argv) {
     using namespace Interceptor;
     try {
         std::wstring mode=argc>1?argv[1]:L"--help";
+        if(mode==L"--self-test-setup" && argc==2)return SetupPolicySelfTest();
+        if(mode==L"--require-usb-backend" && argc==2) {
+            try {
+                if(UsbXusbBackendLoaded(Get_Capabilities()))return 0;
+            }catch(const std::system_error& error) {
+                if(error.code().value()!=ERROR_INVALID_FUNCTION && error.code().value()!=ERROR_NOT_SUPPORTED &&
+                    error.code().value()!=ERROR_REVISION_MISMATCH)throw;
+            }
+            std::cout<<"The installed package requires the USB XUSB backend, but the loaded driver does not advertise it. "
+                "Restart Windows and reopen this installer before completing associations.\n";
+            return ERROR_SUCCESS_REBOOT_REQUIRED;
+        }
         if(mode==L"--associate-controllers"){const auto r=Init_AllDevices();return r.error?static_cast<int>(r.error):r.ready?0:ERROR_SUCCESS_REBOOT_REQUIRED;}
         if(mode==L"--install-control" && argc==3)return ConfigureControlDriver(argv[2],false);
         if(mode==L"--remove-control" && argc==2)return ConfigureControlDriver(nullptr,true);

@@ -40,4 +40,4 @@ $manifest=[ordered]@{
 $manifest|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $out 'build-manifest.json') -Encoding UTF8
 Write-Host "Console installer: $exe"
 Write-Host 'Built independently from InstallerUI/Package and shared Package.cs; no UI executable is required.'
-Write-Host 'Own-product payload and compiled recovery binaries were verified.'
+Write-Host ('Own-product payload and compiled recovery binaries verified. Signing policy: '+$prepared.SigningMode+'. No driver was installed.')

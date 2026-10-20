@@ -4,6 +4,7 @@ try {
     Assert-Administrator
     $payload=Join-Path $PSScriptRoot 'Payload'
     $mode=Assert-InterceptorPayload $payload
+    Assert-InterceptorUsbPackage $payload
     Enter-InterceptorOperation;Start-InterceptorLog 'install';$logged=$true
     $payload=Join-Path $PSScriptRoot 'Payload'
     $mode=Assert-InterceptorPayload $payload
@@ -26,9 +27,7 @@ try {
     if($code -eq 0) {
         & (Join-Path $payload 'InterceptorExample.exe') --status
         if($LASTEXITCODE -ne 0) { throw 'Le pilote ne repond pas apres installation.' }
-        & (Join-Path $payload 'InterceptorExample.exe') --init-all --quiet
-        $code=$LASTEXITCODE
-        if($code -notin @(0,3010)) { throw "Initialisation des peripheriques en echec: $code" }
+        $code=Initialize-InterceptorControllers (Join-Path $payload 'InterceptorExample.exe')
     }
     Set-InterceptorPendingControllers $code (Get-FileHash -LiteralPath (Join-Path $payload 'InterceptorGamepadController.sys') -Algorithm SHA256).Hash
     Get-InterceptorPackages | Select-Object Driver,OriginalFileName | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:ProgramData 'InterceptorGamepadController\packages.json') -Encoding UTF8

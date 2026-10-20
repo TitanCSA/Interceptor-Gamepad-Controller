@@ -1,48 +1,64 @@
 # Installation, diagnostics and recovery
 
-The [1.0.5.0 demo preview](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.5.0-demo)
-includes Microsoft-signed kernel 1.0.3.0 with the same two-hour allowance.
-It is **not a verified fix for the browser / Gamepad API issue**; read the
-[known issues](KNOWN-ISSUES.md) before installing. The default latest release
-remains 1.0.4.0 with kernel 1.0.2.0, which also reproduced that issue.
-Both packages work without enabling test signing or importing a development certificate.
-
-Use `InterceptorSetup.exe` or
-`InterceptorSetupConsole.exe /install`. Both use the same package and association
-engine. `/uninstall` restores this product's associations and removes its packages.
-Exit code `3010` means a Windows restart is required. After installation and a
-restart, reopen the same installer or rerun `/install` to finish associations.
-For an upgrade, use the new release's **Install / reinstall** or `/install`;
-replacing only the viewer EXE leaves the older kernel driver installed.
+The [complete 1.0.6.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo)
+contains Microsoft-signed kernel **1.0.4.0**, rebuilt examples and the updated SDK.
+The two-hour allowance is unchanged. Test signing and development certificates are not required.
 The Microsoft signature covers the driver package, not the installer or example EXEs.
 
-Installation and capture require administrator rights. Merely compiling an
-example does not install a driver. Each example checks for the correct product
-service and gives installation instructions if it is absent.
+## Install or upgrade
 
-The installer lists only this edition's device families plus its control endpoint.
-A control endpoint is the application's connection to the driver, not a physical
-gamepad. A HID collection can use a driver in its parent stack,
-so a blank service field is not necessarily an installation failure. An associated
-filter alone is not proof that input capture or every physical control works.
+1. Close capture applications. Run this release's **InterceptorSetup.exe** and accept elevation.
+2. Choose **Install / reinstall**. Replacing a viewer EXE alone does not update the installed kernel.
+3. If requested, save your work and use Windows **Restart**, then reopen the same installer.
+4. Repeat a requested restart/reopen until the operation completes without another restart request. Then use **Diagnose** and the viewer to verify the connected devices.
 
-**Diagnose** checks one recognized device at a time, reports installation/API
-state and the checks that can run automatically, and provides copy/export actions.
-No observed input means physical interception/modification is unverified, rather
-than a fabricated success or proof that the device is unsupported.
+The console installer performs the same operations:
 
-The keyboard/mouse edition and gamepad/controller edition have independent
-services and state. Their installers leave the other edition's filters, driver
-packages and recovery configuration intact. If original Interceptor already
-captures an overlapping family, remove that overlapping installation first;
-the split installer refuses ambiguous stacking.
+```powershell
+.\InterceptorSetupConsole.exe /install
+.\InterceptorSetupConsole.exe /uninstall
+```
 
-Close capture applications before uninstalling. Closing the process releases
-its capture handles; the controller-only kernel does not monitor keyboard shortcuts.
-The product-specific
-recovery binaries are embedded in both installers. Their startup marker and
-recovery state use the product's own identity; see the installer status message.
-Use a normal Windows restart after recovery when requested.
+Exit code `3010` means **restart required**; rerun `/install` after restarting.
+Windows never restarts automatically.
 
-Diagnostics and exports can contain PnP instance IDs and controller protocol
-metadata. Remove serial numbers before sharing a report publicly.
+Use the examples supplied in this release. Rebuild custom applications with its **Interceptor.h + Interceptor.cpp**.
+Wire ABI 4 remains unchanged, but older compiled clients can still use the obsolete XUSB SOURCE/mirror startup path and need rebuilding for the USB backend.
+
+### Why an upgrade may request two restarts
+
+Legacy XUSB installations used an upper filter and a secondary HID mirror.
+Kernel 1.0.4.0 uses a USB lower filter and native Windows translation instead.
+The first restart can be needed to replace the loaded image; after reopening, the installer migrates this product's old associations and may request another restart to load the new stacks.
+It preserves other products' filter names and order, and does not force a live device restart.
+
+The installer checks the loaded backend before accepting completion.
+An older loaded backend keeps the operation pending rather than reporting success after skipping XUSB migration.
+The same installer resumes that work; no scheduled installation or RunOnce continuation is added.
+
+## Verify the connected devices
+
+Installation and capture require administrator rights. Compiling an example does not install the driver.
+Each example checks for this edition's service and explains how to install it when absent.
+
+The installer lists this edition's controller families and its **control endpoint**, the application's connection to the driver rather than a physical gamepad.
+A HID collection can use a service in its parent stack, so a blank service field is not necessarily a failure.
+An associated filter alone does not prove that interception or every physical control works.
+
+**Diagnose** checks recognized devices individually, reports installation/API state and provides copy/export actions.
+Unexercised physical interception/modification remains **unverified**; a quiet controller is not automatically declared unsupported.
+Compare the affected consumer too: the viewer, browser and `joy.cpl` use different paths.
+[Validation limits](KNOWN-ISSUES.md) and [viewer troubleshooting](VIEWER-TROUBLESHOOTING.md).
+
+## Editions and recovery
+
+The keyboard/mouse and gamepad/controller editions have independent services and state; their installers leave the other edition intact.
+Remove an overlapping original Interceptor installation first. Ambiguous stacking is refused.
+
+Close capture applications before uninstalling. `/uninstall` restores this product's associations and removes its packages.
+Normal client closure releases capture; the kernel also restores passthrough when a capture client terminates abruptly.
+Product-specific precompiled recovery binaries are embedded in both installers.
+Their startup marker and recovery state use this product's own identity; consult the installer status message and restart normally when requested.
+
+Diagnostic exports can contain PnP instance IDs and controller protocol metadata.
+Remove serial numbers before sharing them publicly.

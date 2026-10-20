@@ -60,4 +60,29 @@ function Assert-InterceptorPayload([string]$Payload,[switch]$AllowDevelopment) {
     }
     return $mode
 }
+function Assert-InterceptorUsbPackage([string]$Payload) {
+    # Call only after Assert-InterceptorPayload verified this exact embedded INF,
+    # catalog, image and helper. Never apply the new backend requirement to an
+    # older signed package merely because its service name matches.
+    $inf=Get-Content -LiteralPath (Join-Path $Payload 'InterceptorGamepadControllerControl.inf') -Raw
+    $versions=[regex]::Matches($inf,'(?im)^\s*DriverVer\s*=\s*[^,\r\n]+,\s*(\d+\.\d+\.\d+\.\d+)\s*$')
+    if($versions.Count -ne 1 -or [version]$versions[0].Groups[1].Value -lt [version]'1.0.4.0'){
+        throw 'This installer requires the Microsoft-signed USB-backend driver package 1.0.4.0 or later. The older embedded package cannot complete this upgrade.'
+    }
+}
+function Invoke-InterceptorSetupHelper([string]$Helper,[string[]]$Arguments) {
+    & $Helper @Arguments|ForEach-Object{Write-Host $_}
+    return [int]$LASTEXITCODE
+}
+function Initialize-InterceptorControllers([string]$Helper) {
+    # The SDK intentionally refuses to migrate an older loaded upper backend.
+    # Installation must preserve its pending state instead of treating skipped
+    # XUSB associations as proof that the new package is operational.
+    $backend=Invoke-InterceptorSetupHelper $Helper @('--require-usb-backend')
+    if($backend -eq 3010){return 3010}
+    if($backend -ne 0){throw ('Cannot verify the loaded USB XUSB backend: '+$backend)}
+    $code=Invoke-InterceptorSetupHelper $Helper @('--init-all','--quiet')
+    if($code -notin @(0,3010)){throw ('Controller initialization failed: '+$code)}
+    return $code
+}
 . (Join-Path $PSScriptRoot 'Lifecycle.ps1')

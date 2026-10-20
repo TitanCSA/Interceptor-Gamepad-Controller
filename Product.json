@@ -3,7 +3,7 @@
   "DisplayName": "Interceptor Gamepad & Controller",
   "Service": "InterceptorGamepadController",
   "DriverFile": "InterceptorGamepadController.sys",
-  "Version": "1.0.3.0",
+  "Version": "1.0.4.0",
   "InputMask": 0,
   "ControllerMask": 15,
   "Packages": [

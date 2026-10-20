@@ -1,51 +1,55 @@
-# Preview known issues and validation
+# Validation and remaining limits
 
-The **1.0.5.0 demo prerelease** packages Microsoft-signed kernel **1.0.3.0**.
-The viewer and C++ SDK remain **1.0.4.0**. The two-hour demo allowance is unchanged.
-The default latest release remains **1.0.4.0**, with kernel **1.0.2.0**.
-Neither version is claimed to fix the browser issue described below.
+[Release 1.0.6.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo)
+contains Microsoft-signed kernel **1.0.4.0**, the updated C++ SDK and rebuilt user-mode applications.
+The two-hour demo allowance is unchanged.
 
-## Browser / Gamepad API: still reproduced
+## Native Windows consumer regression
 
-Controlled Windows 11 tests used virtual Xbox 360 / XUSB and Xbox One / GIP
-device stacks, a normal foreground Microsoft Edge window, and the real
-`navigator.getGamepads()` API. No browser gamepad emulation was used.
+Earlier kernels intercepted native XUSB requests above the Windows function driver.
+That backend could return incorrect results to Windows input consumers even with no capture context open.
+The regression was reproduced in a foreground browser; bypassing that backend restored native behavior.
 
-| Installed filter | Browser result |
+Kernel 1.0.4.0 intercepts supported XUSB input below the Windows function driver at the USB transport.
+Windows continues handling native request validation, foreground policy, HID translation and output requests.
+The SDK no longer needs the legacy XUSB native-source/secondary-HID-mirror startup handshake.
+
+| Release bundle | Kernel | Controlled browser result |
+| --- | --- | --- |
+| Earlier 1.0.4.0 demo | 1.0.2.0 | Regression reproduced |
+| Earlier 1.0.5.0 preview | 1.0.3.0 | Regression reproduced |
+| Current 1.0.6.0 demo | 1.0.4.0 | Both virtual XUSB and GIP controllers matched expected input |
+
+Older downloads remain historical artifacts; replacing only a viewer cannot update their installed kernel.
+
+## What was actually verified
+
+The production candidate was tested in an isolated Windows 11 VM with controlled virtual wired-XUSB and GIP controllers.
+The Microsoft-signed return was checked against that candidate's executable content.
+
+| Check | Evidence and scope |
 | --- | --- |
-| No Interceptor Gamepad Controller | Both controllers reported the expected changing buttons, sticks and triggers |
-| Published kernel 1.0.2.0 | No gamepads exposed |
-| No filter again, after restoring the baseline | Both controllers reported the expected changes again |
-| Preview kernel 1.0.3.0 | No gamepads exposed |
+| Default browser Gamepad API, no capture | A real foreground Edge window used native `navigator.getGamepads()`. Both controllers matched four axes, two triggers, A/B and neutral phases; 140 stable readings per family matched. No browser gamepad emulation was used. |
+| Modification during quiet input | A real SDK capture sent two different modified states while physical reports were quiet. Independent foreground Windows.Gaming.Input readings verified four axes, two triggers and A/B for each family. Send acceptance alone was insufficient. |
+| Normal close and abrupt client termination | Independent Windows.Gaming.Input readings returned to the fixture's active and neutral physical states after each case. |
+| Windows game-controller panel | Actual `joy.cpl` tester windows and their phase-correlated screens were reviewed for both virtual controllers. This was not inferred solely from XInput or a successful process exit. |
+| Windows Search mouse input | With neutral fixtures, a real mouse click on a verified Search result opened a new Notepad process. The test used Windows 11 Search, not a UI Automation invoke action. |
+| Build and regression checks | User-mode builds, installer continuation tests and production kernel regression tests passed; the release keeps the existing public API. |
 
-The same fixture and browser test were used throughout. Native XInput readings
-confirmed the fixture's expected states while the browser failed.
-A separate foreground Windows.Gaming.Input test with kernel 1.0.3.0 enumerated
-one controller but returned neutral readings with a zero timestamp in all
-97 samples taken during active button / axis phases. The API calls succeeded;
-that does not make their unchanged readings correct. The precise kernel cause
-has not been established.
+## What remains unverified
 
-These results reproduce a consumer compatibility regression after installation,
-including with no application capture context open. A successful SDK viewer,
-signature check or native XInput check alone is insufficient to verify its fix.
+- The user's physical controllers and the reported **Windows 10 Search** surface still require verification on that machine. A successful Windows 11 Search test does not certify Windows 10.
+- Virtual-device results do not establish support for every firmware, proprietary report, Bluetooth mode, wireless receiver or vendor feature. See [compatibility](COMPATIBILITY.md).
+- The tests are not physical input-latency, polling-rate or monitor-FPS measurements. There is no promise of zero delay or universal compatibility.
+- Windows retains its foreground/background access policy. A background consumer's neutral reading must be assessed in that context.
 
-## Windows game controller panel: limited result
+## Upgrade correctly
 
-The actual `joy.cpl` interface showed changing axes and buttons in the tested
-virtual-device baseline and preview cases. This did **not** reproduce the
-reported failure on a physical GIP controller, so that physical-device issue
-remains unverified. Virtual-device results do not certify every controller,
-firmware, connection mode or Windows input consumer.
+Use this release's UI or console installer. A legacy-backend upgrade can require **two normal Windows restarts**, reopening the same installer after each request: first load the new image, then load the migrated controller filters.
+The installer preserves pending work when an older backend remains loaded and rechecks older incomplete journals.
+No forced device restart or automatic reboot is performed. [Installation](INSTALLATION.md).
+Use this release's rebuilt examples and rebuild custom applications with both updated SDK files.
+Wire ABI 4 is retained; an older compiled client's legacy XUSB SOURCE/mirror startup sequence can still require an SDK rebuild.
 
-## What the preview does not establish
-
-The Microsoft signature validates the driver package's signature and integrity;
-it is not evidence that the browser regression is resolved. These tests are
-compatibility checks, not latency measurements, hardware coverage or proof of
-zero delay. Capture and forwarding were not qualified for every family in these
-consumer tests.
-
-When reporting a problem, include the package and installed driver versions,
-Windows build, controller VID/PID, connection type, affected application and
-whether capture was active. Remove personal identifiers from diagnostic exports.
+For a report, include bundle and installed-kernel versions, Windows build, VID/PID, connection type, affected application and whether capture was active.
+Remove serial numbers and other personal identifiers from diagnostic exports.

@@ -264,6 +264,7 @@ void TestForwarding(){
 void Run(unsigned type,const std::wstring& instance,HWND owner){
     Emit("api","info","Reading the loaded driver's capabilities.",5);const auto caps=Get_Capabilities();
     Emit("api","pass","API ABI "+std::to_string(caps.abi_version)+"; XUSB profiles="+std::to_string(caps.xusb_profiles)+", XInputHID="+std::to_string(caps.xinputhid_profiles)+", GIP="+std::to_string(caps.gip_profiles)+".",10);
+    if(type==4)Emit("xusb_transport","info",(caps.xusb_profiles&IC_PROFILE_XUSB_USB_FILTER)?"USB lower filter below xusb22. Readiness comes from the central device query and native USB pipeline; no native SOURCE handle or separate HID mirror is required.":"Legacy XUSB upper-filter backend. Install the current driver package and complete the requested Windows restart before migrating to the USB backend.",11);
     try{const auto trial=Get_Trial_Status();
         if(trial.state==IC_TRIAL_EXPIRED){Emit("trial_expired","unverified","The two-hour demo has expired: capture and modification are disabled until Windows restarts. Physical input remains functional.",100);return;}
         if(trial.state==IC_TRIAL_UNAVAILABLE){Emit("trial_state","error","Demo status unavailable; capture disabled, passthrough preserved. Windows="+std::to_string(trial.error)+".",100);return;}

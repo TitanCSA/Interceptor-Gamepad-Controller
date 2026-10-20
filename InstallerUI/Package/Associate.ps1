@@ -4,6 +4,7 @@ try {
     Assert-Administrator
     $payload=Join-Path $PSScriptRoot 'Payload'
     $mode=Assert-InterceptorPayload $payload
+    Assert-InterceptorUsbPackage $payload
     Enter-InterceptorOperation;Start-InterceptorLog 'association';$logged=$true
     $payload=Join-Path $PSScriptRoot 'Payload'
     $helper=Join-Path $payload 'InterceptorExample.exe'
@@ -19,14 +20,7 @@ try {
         if(!$package -or !(Test-Path -LiteralPath $package.OriginalFileName)) { throw 'Pilote absent du magasin Windows. Executer Installer.bat une premiere fois.' }
         $paths+= $package.OriginalFileName
     }
-    & $helper --associate-controllers
-    $code=$LASTEXITCODE
-    if($code -notin @(0,3010)) { throw "Association interrompue ($code). Certaines associations peuvent avoir reussi ; consulter ce journal puis relancer le script." }
-    if($code -eq 0) {
-        & $helper --init-all --quiet
-        $code=$LASTEXITCODE
-        if($code -notin @(0,3010)) { throw "Initialisation des manettes en echec: $code" }
-    }
+    $code=Initialize-InterceptorControllers $helper
     Set-InterceptorPendingControllers $code (Get-FileHash -LiteralPath (Join-Path $payload 'InterceptorGamepadController.sys') -Algorithm SHA256).Hash
     Write-Host 'Association terminee. Les pilotes tiers sont laisses en place.'
     if($code -eq 3010) { Write-Host 'Windows demande un redemarrage pour terminer.' }
