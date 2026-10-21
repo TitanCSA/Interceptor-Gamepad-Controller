@@ -1,6 +1,6 @@
 # Input viewer diagnostics
 
-Use the [complete 1.0.7.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo),
+Use the [complete 1.0.7.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.8.0-demo),
 which includes signed kernel **1.0.5.0** and user-mode applications rebuilt with the updated SDK.
 The native bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL is needed.
 Use this release's installer to update the kernel, then finish all requested restart/reopen steps.
@@ -9,7 +9,8 @@ Wire ABI 4 is retained, but an older compiled client's legacy XUSB SOURCE/mirror
 
 ## Observe once
 
-Run the viewer as administrator, select a family and click **Observe** once.
+Open the viewer and accept the administrator prompt. Observation starts
+automatically; select a family to display it. After **Stop**, **Observe** resumes.
 **XInput / XUSB** is the native Xbox 360-style transport; **XInputHID** is a separate HID-backed family.
 The SDK creates and reuses its all-device capture automatically; the selected tab controls what the viewer displays.
 Keyboard activity and repeated Observe clicks are not required.

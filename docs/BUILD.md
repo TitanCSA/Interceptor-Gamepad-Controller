@@ -45,6 +45,6 @@ link `Interceptor::SDK`. See [API setup](API.md).
 The two editions use the same namespace; use the library matching your driver
 edition and do not link both alternative SDK implementations into one executable.
 The 1.0.7.0 bundle separates versions: Microsoft-signed kernel 1.0.5.0,
-SDK and viewer 1.0.4.2, installer wrappers 1.0.7.0. The two public SDK files
+SDK 1.0.4.2, viewer 1.0.4.3, installer wrappers 1.0.7.0. The two public SDK files
 remain sufficient for capture clients; passive telemetry is a separate read-only
 control protocol, with its client implementation in GamePad Remapper.

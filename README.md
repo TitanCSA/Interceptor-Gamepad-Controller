@@ -21,7 +21,8 @@ Screenshots illustrate the interface; preview controller inputs are simulated.
 1. Download this repository's **InterceptorSetup.exe**, run it and accept elevation.
 2. Choose **Install / reinstall**. If requested, use Windows **Restart** and
    reopen setup to finish associations. Continue until no restart is requested.
-3. Open **InterceptorExampleUI.exe** as administrator and click **Observe**.
+3. Open **InterceptorExampleUI.exe** and accept the administrator prompt.
+   Observation starts automatically; tabs select the family to display.
    Select a controller family to inspect its input. **Stop** releases capture;
    run one capture application at a time.
 4. Use **Diagnose** for per-device checks and a report you can copy or export.
@@ -64,6 +65,17 @@ use [GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper). Its passiv
 monitor works without a running script or capture and does not start the demo
 timer. [What IN and OUT measure](docs/PASSIVE-MONITOR.md).
 
+## Example applications
+
+The [five standalone controller examples](ExamplesConsole/README.md) demonstrate
+vertical inversion, button swaps, instant triggers, 50% stick deadzone and an
+inverse exponential curve. Each supports HID, XInput/XUSB, XInputHID and GIP.
+
+[GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper) is a complete
+example application using this driver and SDK: scripts, macros, script-defined
+settings and continuous IN / OUT monitoring. Its C++ source shows how to build
+a full application on top of the same capture and forwarding API.
+
 ## C++ SDK
 
 Add [`Interceptor.h`](Interceptor/Interceptor.h) and
@@ -93,7 +105,7 @@ contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
 
 ```text
 Interceptor/       Interceptor.h and Interceptor.cpp
-ExamplesConsole/   Controller passthrough and decoded HID axis examples
+ExamplesConsole/   Five complete controller remapping examples
 ExamplesUI/        Graphical input viewer
 InstallerConsole/  Console installer
 InstallerUI/       GUI, setup engine and compiled driver/recovery binaries
