@@ -1,109 +1,127 @@
-# Interceptor Gamepad & Controller — Windows Kernel Filter Driver
+# Interceptor Gamepad & Controller - Windows Kernel Filter Driver
 
-**Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller input, with a two-file C++17 SDK.**
+Capture and remap **physical gamepad/controller input** with a **Microsoft-signed
+Windows kernel filter driver** and a **two-file C++17 SDK**. Supports compatible
+HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 x64**.
 
-> **[1.0.7.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo) · signed kernel 1.0.5.0; SDK 1.0.4.2.**
-> Native XUSB interception now runs below the Windows function driver, preserving its input-consumer behavior.
-> Earlier kernel 1.0.4.0 browser, Windows game-controller panel and Search tests passed with controlled Windows 11 virtual devices. [Validation and remaining limits](docs/KNOWN-ISSUES.md).
-
-Receive input, identify its source, read or change it, then forward it through one API.
-Windows 10 1709+ / Windows 11 **x64**; installation and capture require administrator rights.
-Compatible USB profiles include **DualShock 4 (DS4 / PS4), DualSense (PS5), wired Xbox 360, Xbox One and Xbox Series X|S**.
-Connection, descriptor and protocol determine support; a model name does not certify every firmware or wireless mode.
-
-**[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** · [Installation](docs/INSTALLATION.md) · [C++ API](docs/API.md) · [Compatibility](docs/COMPATIBILITY.md) · [Examples](ExamplesConsole/README.md)
+**[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** |
+[Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
+[Compatibility](docs/COMPATIBILITY.md) | [Examples](ExamplesConsole/README.md)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
-| ![Product-specific installer](docs/images/installer.png) | ![Input viewer with simulated input](docs/images/viewer.png) |
+| ![Controller installer](docs/images/installer.png) | ![Viewer with simulated controller input](docs/images/viewer.png) |
 
-Images illustrate the interface; simulated viewer input is not a physical-device test.
+Screenshots illustrate the interface; preview controller inputs are simulated.
 
-## Quick start
+<a id="quick-start"></a>
 
-1. Run this release's **InterceptorSetup.exe**, accept elevation, then click **Install / reinstall**.
-2. If requested, use Windows **Restart** and reopen the same installer. Upgrading the legacy XUSB backend can require **two restarts**: one to load the new driver, then one to load migrated controller filters. Continue until no restart is requested.
-3. Run **InterceptorExampleUI.exe** as administrator and click **Observe** once. **Stop** releases capture; close other capture applications first.
-4. **Diagnose** provides per-device installation/API checks and a copyable report. Physical features not exercised automatically remain **unverified**.
+## Install and use
 
-The console installer uses the same installation engine:
+1. Download this repository's **InterceptorSetup.exe**, run it and accept elevation.
+2. Choose **Install / reinstall**. If requested, use Windows **Restart** and
+   reopen setup to finish associations. Continue until no restart is requested.
+3. Open **InterceptorExampleUI.exe** as administrator and click **Observe**.
+   Select a controller family to inspect its input. **Stop** releases capture;
+   run one capture application at a time.
+4. Use **Diagnose** for per-device checks and a report you can copy or export.
+   Features that were not exercised remain **unverified**.
+
+The GUI provides **Uninstall**. The console installer uses the same setup engine:
 
 ```powershell
 .\InterceptorSetupConsole.exe /install
 .\InterceptorSetupConsole.exe /uninstall
 ```
 
-Exit code `3010` requests a restart; rerun `/install` afterward. Replacing only the viewer EXE does not upgrade the driver.
-The Microsoft signature covers the driver package, not the installer or example EXEs. [Recovery and troubleshooting](docs/INSTALLATION.md).
+Exit code `3010` requests a restart; rerun `/install` afterward if associations
+are pending. Updating only the viewer does not update the driver. The driver's
+Microsoft signature does not automatically sign installer or example EXEs.
+[Installation and recovery](docs/INSTALLATION.md).
 
-## What changed
+## How it works
 
-**1.0.7.0 adds passive driver IN / OUT telemetry:** observe reports received by the filter and successful completions towards Windows, independently of capture and scripts. It does not start the two-hour capture allowance. [Measurement boundaries and limits](docs/PASSIVE-MONITOR.md). The live interface is in [GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper); the SDK capture API and classic viewer keep their existing behavior.
+The filter receives supported physical reports before they reach the associated
+Windows input consumers. A capture application can read or change them, then
+return them through the device's native path. Without a capture owner, physical
+input passes through normally. Closing the application releases capture.
 
-The installation and recovery fixes from **1.0.6.1** are retained: unrelated historical Xbox HID views are skipped, valid empty filter lists are accepted, an unbound control endpoint is reused, and incomplete recovery preserves the package. Setup failures identify the stage and device; the rebuilt helper uses SDK **1.0.4.2**.
-
-
-Kernel **1.0.4.0** replaces the legacy XUSB upper backend with a USB lower filter.
-Windows keeps ownership of native XInput / Windows.Gaming.Input requests, foreground policy and translated HID views.
-The SDK discovers XUSB through the central endpoint, without requiring the former native-source or secondary-HID-mirror startup handshake.
-The installers migrate only this product's legacy associations and preserve pending work until the expected backend is loaded.
-All supplied user-mode applications are rebuilt with the updated SDK.
-Rebuild custom applications with this release's **Interceptor.h + Interceptor.cpp**.
-Wire ABI 4 is retained, but older compiled clients can still attempt the obsolete XUSB source/mirror startup path.
-
-Earlier kernel **1.0.4.0** consumer tests used the default browser Gamepad API, actual `joy.cpl` tester windows and a real Search mouse click.
-Independent Windows.Gaming.Input readings also confirmed modified XUSB/GIP inputs sent during quiet periods and restoration after normal close and abrupt client termination.
-These are bounded Windows 11 virtual-device tests. The reported physical-controller and Windows 10 Search cases still require verification on that hardware.
-[Details](docs/KNOWN-ISSUES.md).
-
-## Downloads and source
-
-The [complete 1.0.7.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
-Bundle **1.0.7.0** contains signed kernel **1.0.5.0**, SDK/viewer **1.0.4.2** and installers **1.0.7.0**.
-
-| File | Contents |
+| Family | Input handling |
 | --- | --- |
-| `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
-| `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
-| `InterceptorExampleUI.exe` | Standalone input viewer with embedded bridge |
-| `Interceptor-Gamepad-Controller-1.0.7.0-demo.zip` | Complete installers, viewer and console examples |
-| `Interceptor-Gamepad-Controller-1.0.7.0-demo-SDK.zip` | SDK, example and installer source |
-| `Interceptor-Gamepad-Controller-1.0.7.0-Examples.zip` | Viewer and console examples |
-| `SHA256SUMS.txt` | Download checksums |
+| HID | Dynamic controls decoded from the device's report descriptor |
+| XInput / XUSB | Compatible wired USB source beneath the native Windows XUSB driver |
+| XInputHID | Supported HID collection beneath the Windows translator |
+| GIP | Compatible USB gamepad protocol, standard state and Guide input |
+
+Compatible profiles include **DualShock 4 / DS4 (PS4), DualSense (PS5), wired
+Xbox 360, Xbox One and Xbox Series X|S**. Connection, descriptor and protocol
+determine support; consult the [compatibility guide](docs/COMPATIBILITY.md).
+Windows can expose multiple nodes for one controller, including secondary HID
+views; the setup table is not a count of physical gamepads.
+
+For continuous **physical IN / driver OUT** inspection and script-based remapping,
+use [GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper). Its passive
+monitor works without a running script or capture and does not start the demo
+timer. [What IN and OUT measure](docs/PASSIVE-MONITOR.md).
+
+## C++ SDK
+
+Add [`Interceptor.h`](Interceptor/Interceptor.h) and
+[`Interceptor.cpp`](Interceptor/Interceptor.cpp) to your Windows x64 C++17 project.
+Compile the source once and include the header. No Interceptor DLL or prebuilt
+LIB is required; live capture requires administrator rights.
+
+`Get_Input_With_Timeout()` automatically creates and reuses the session and
+returns a batch containing the supported input families. Read or change typed
+state and call `Send_Input(inputs)`. The library determines destinations, types
+and counts. Forward unchanged entries too, and finish the batch before receiving
+another one. [API reference](docs/API.md).
+
+This edition handles controllers only. It can coexist with the separate
+[Keyboard & Mouse edition](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse),
+which has its own service, SDK and demo allowance. Remove an overlapping combined
+[Interceptor](https://github.com/TitanCSA/Interceptor) installation first.
+
+<a id="downloads-and-source"></a>
+
+## Downloads and build
+
+The [latest release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)
+contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
+**InterceptorExampleUI.exe**, complete/examples/source SDK ZIPs and
+**SHA256SUMS.txt**. Use matching components from the same release.
 
 ```text
-Interceptor/       Interceptor.h + Interceptor.cpp; no SDK DLL required
-ExamplesConsole/   Controller pass-through and descriptor-decoded HID axis inversion
+Interceptor/       Interceptor.h and Interceptor.cpp
+ExamplesConsole/   Controller passthrough and decoded HID axis examples
 ExamplesUI/        Graphical input viewer
 InstallerConsole/  Console installer
-InstallerUI/       UI, shared installation engine and precompiled driver/recovery
-docs/              API, installation, compatibility and images
-licenses/          Driver binary terms and attribution
+InstallerUI/       GUI, setup engine and compiled driver/recovery binaries
+docs/ licenses/    Guides, screenshots and license terms
 ```
 
-With Visual Studio 2022 C++ tools, a Windows SDK and CMake installed, run
-`powershell -ExecutionPolicy Bypass -File .\Build.ps1` to build user-mode applications.
-Builds embed the supplied signed driver and precompiled recovery binaries.
-**Kernel source and private signing material are not included.**
-[Build instructions](docs/BUILD.md). User-mode source is [MIT](LICENSE); the demo driver has [separate terms](licenses/BINARY-LICENSE.txt).
+Build user-mode tools with Visual Studio 2022 C++ tools, a Windows SDK and CMake:
+`powershell -ExecutionPolicy Bypass -File .\Build.ps1`.
+The signed driver and compiled recovery binaries are supplied; **kernel source
+is not included**. [Build guide](docs/BUILD.md). User-mode source is [MIT](LICENSE);
+the driver has [separate terms](licenses/BINARY-LICENSE.txt).
 
-## Two-hour demo
+<a id="two-hour-demo"></a>
 
-**Two hours per Windows boot**, starting with the first successful capture, shared across this edition's applications.
-Sleep time counts. Closing applications, uninstalling or reinstalling does not reset the allowance; diagnostics that create a capture can start it. Passive IN / OUT observation does not create a capture or start the allowance, and remains available after capture expiry.
-At expiry, captures are revoked, new capture/injection is refused, and physical input continues normally.
-Use Windows **Restart** for a new allowance; Fast Startup shutdown does not reset the kernel boot.
-For the **full version without the demo time limit**, DM **`titancsa`** on Discord.
+## Demo edition
 
-## Separate editions and attribution
+**Two hours per Windows kernel boot**, starting with the first successful capture
+and shared across this edition's applications. Sleep time counts; closing or
+reinstalling does not reset it. Capture diagnostics can start the allowance.
+At expiry, captures are released and capture/injection stop; physical input passes
+through normally. Use Windows **Restart** for a new allowance. Passive IN / OUT
+monitoring remains available and does not start or reset this timer.
+For the unrestricted version, DM **`titancsa`** on Discord.
 
-This edition handles **gamepad/controller input only**. [Interceptor-Keyboard-Mouse](https://github.com/TitanCSA/Interceptor-Keyboard-Mouse) has its own service, associations, recovery state and demo allowance; the two editions can coexist.
-Use each edition's own SDK. Remove an overlapping original [Interceptor](https://github.com/TitanCSA/Interceptor) installation first; the split installers refuse conflicting stacking and do not uninstall another product automatically.
-
-This independent project evolves the input-interception workflow popularized by
-[oblitum's Interception](https://github.com/oblitum/Interception), with its own implementation and API.
-It is not affiliated with oblitum or ABI-compatible with the original. See [attribution](licenses/NOTICE).
-For a bug report, include the release, installed driver version, Windows build, VID/PID, connection type and affected consumer; remove personal identifiers from diagnostic exports.
+This independent project evolves the workflow popularized by
+[oblitum/Interception](https://github.com/oblitum/Interception), with its own
+implementation and API. It is not affiliated with oblitum or ABI-compatible with
+the original. [Attribution](licenses/NOTICE).
 
 ## Minimal example: receive, read, forward
 
