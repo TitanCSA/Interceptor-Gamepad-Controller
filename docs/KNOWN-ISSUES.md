@@ -1,9 +1,16 @@
 # Validation and remaining limits
 
-[Release 1.0.6.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo)
+[Release 1.0.6.1](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo)
 contains Microsoft-signed kernel **1.0.4.0**, the updated C++ SDK and rebuilt user-mode applications.
 The two-hour demo allowance is unchanged.
 
+## Installation failure in 1.0.6.0
+
+The installer examined historical Xbox HID views while cleaning legacy associations. An unowned, disconnected view with an unbound ancestor could lack its setup-class property; reading it aborted setup with error 13 before any controller was associated. The same failure interrupted restoration, after which the old installer incorrectly deleted the newly staged driver package. A later install could then overlook the classless root endpoint and fail to recreate its stable ID.
+
+Version **1.0.6.1** limits legacy cleanup to this product's own identity values or exact filter references, reuses its unbound root endpoint and retains the package/recovery files when restoration is incomplete. It also accepts the documented single-NUL form of an empty filter list and includes setup-stage/device/error details. The Microsoft-signed kernel remains **1.0.4.0**.
+
+The original install/rollback sequence was reproduced on a Windows 11 VM with absent class-wide filter values and a historical HID view. The corrected installer repaired the orphaned state, completed association after a normal restart and passed a repeated full installation with exactly one control endpoint. Physical Windows 10 verification remains necessary; no manual registry cleanup is required for the repaired path.
 ## Native Windows consumer regression
 
 Earlier kernels intercepted native XUSB requests above the Windows function driver.
@@ -18,7 +25,7 @@ The SDK no longer needs the legacy XUSB native-source/secondary-HID-mirror start
 | --- | --- | --- |
 | Earlier 1.0.4.0 demo | 1.0.2.0 | Regression reproduced |
 | Earlier 1.0.5.0 preview | 1.0.3.0 | Regression reproduced |
-| Current 1.0.6.0 demo | 1.0.4.0 | Both virtual XUSB and GIP controllers matched expected input |
+| Current 1.0.6.1 demo | 1.0.4.0 | Both virtual XUSB and GIP controllers matched expected input |
 
 Older downloads remain historical artifacts; replacing only a viewer cannot update their installed kernel.
 

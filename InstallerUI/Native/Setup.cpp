@@ -10,11 +10,19 @@ namespace Interceptor {Init_Result Restore_Controller_Hid_Filters();}
 #include <vector>
 #include <set>
 #include <iostream>
+#include <iomanip>
 #include <system_error>
 #include "SetupBinding.h"
 
 namespace {
 void Check(BOOL ok,const char* operation) { if(!ok)throw std::system_error(static_cast<int>(GetLastError()),std::system_category(),operation); }
+std::string ErrorDevice(const std::wstring& device) {
+    const auto size=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,device.c_str(),-1,nullptr,0,nullptr,nullptr);
+    if(size<=0)return "<unavailable>";
+    std::string text(static_cast<std::size_t>(size),'\0');
+    if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,device.c_str(),-1,text.data(),size,nullptr,nullptr)<=0)return "<unavailable>";
+    text.resize(static_cast<std::size_t>(size)-1);return text;
+}
 struct Devices { HDEVINFO value;~Devices(){if(value!=INVALID_HANDLE_VALUE)SetupDiDestroyDeviceInfoList(value);} };
 constexpr wchar_t ControlHardware[]=L"ROOT\\InterceptorGamepadController";
 constexpr wchar_t ControlInstance[]=L"ROOT\\InterceptorGamepadController\\0000";
@@ -39,7 +47,9 @@ bool RemoveControlDevice(HDEVINFO set,SP_DEVINFO_DATA& d) {
     return (params.Flags&(DI_NEEDREBOOT|DI_NEEDRESTART))!=0;
 }
 bool ConfigureControl(const wchar_t* inf,bool remove) {
-    Devices scan{SetupDiGetClassDevsW(&GUID_DEVCLASS_SYSTEM,nullptr,nullptr,0)};
+    // Removing a package can leave its root instance without a setup class.
+    // Include those instances so retrying installation reuses the stable ID.
+    Devices scan{SetupDiGetClassDevsW(nullptr,nullptr,nullptr,DIGCF_ALLCLASSES)};
     Check(scan.value!=INVALID_HANDLE_VALUE,"Enumerate root control devices");
     std::vector<std::wstring> ids;
     for(DWORD index=0;;++index) {
@@ -48,7 +58,8 @@ bool ConfigureControl(const wchar_t* inf,bool remove) {
         if(!IsControl(scan.value,d))continue;
         wchar_t id[MAX_DEVICE_ID_LEN]{};Check(SetupDiGetDeviceInstanceIdW(scan.value,&d,id,MAX_DEVICE_ID_LEN,nullptr),"Read root control ID");ids.emplace_back(id);
     }
-    Devices set{SetupDiCreateDeviceInfoList(&GUID_DEVCLASS_SYSTEM,nullptr)};
+    // A class-specific set cannot open an unbound/classless root instance.
+    Devices set{SetupDiCreateDeviceInfoList(nullptr,nullptr)};
     Check(set.value!=INVALID_HANDLE_VALUE,"Create root control information set");
     bool reboot=false;
     if(remove) {
@@ -72,7 +83,12 @@ bool ConfigureControl(const wchar_t* inf,bool remove) {
         Check(UpdateDriverForPlugAndPlayDevicesW(nullptr,ControlHardware,inf,INSTALLFLAG_FORCE|INSTALLFLAG_NONINTERACTIVE,&needsRestart),"Bind root control driver");
         reboot=needsRestart!=FALSE;
     } catch(...) {
-        if(registered)try {RemoveControlDevice(set.value,created);}catch(const std::exception& e){std::cerr<<"Root rollback failed: "<<e.what()<<'\n';}
+        if(registered)try {RemoveControlDevice(set.value,created);}
+        catch(const std::system_error& e){
+            const auto code=static_cast<unsigned long>(e.code().value());
+            std::cerr<<"Root rollback failed: "<<e.what()<<" [Win32 "<<std::dec<<code
+                <<" / 0x"<<std::hex<<std::uppercase<<std::setw(8)<<std::setfill('0')<<code<<std::dec<<"]\n";
+        }catch(const std::exception& e){std::cerr<<"Root rollback failed: "<<e.what()<<'\n';}
         throw;
     }
     std::cout<<"Root control configured; reboot="<<reboot<<'\n';return reboot;
@@ -87,7 +103,14 @@ int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew,const wchar
     }
     if(restore) {
         const auto hid=Interceptor::Restore_Controller_Hid_Filters();
-        if(hid.error)throw std::system_error(hid.error,std::system_category(),"Remove HID controller filters");
+        // Keep the control devnode and its driver while an input stack might
+        // still reference this service. The installer must keep its package.
+        if(hid.error) {
+            std::string detail="Remove HID controller filters; control endpoint retained for recovery";
+            if(!hid.error_detail.empty())detail+="; stage: "+hid.error_detail;
+            if(!hid.error_device.empty())detail+="; device or class: "+ErrorDevice(hid.error_device);
+            throw std::system_error(hid.error,std::system_category(),detail);
+        }
         needsReboot|=hid.reboot_required;
     }
     if(restore)needsReboot|=ConfigureControl(nullptr,true);

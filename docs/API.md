@@ -22,6 +22,10 @@ The SDK connects only to this product's own driver endpoint.
 the first successful creation starts the trial. `Init_AllDevices()` and
 `Get_Trial_Status()` do not start that allowance.
 
+If initialization fails, `init.error_detail` identifies the operation and
+`init.error_device` identifies the device when known. These fields preserve the
+first failure alongside `init.error`; they are empty after successful setup.
+
 Family-specific reads available in this edition:
 
 - `Get_Controller_Hid_Input()`

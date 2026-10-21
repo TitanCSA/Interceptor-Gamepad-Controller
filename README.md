@@ -2,7 +2,7 @@
 
 **Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller input, with a two-file C++17 SDK.**
 
-> **[1.0.6.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo) · signed kernel 1.0.4.0.**
+> **[1.0.6.1 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo) · signed kernel 1.0.4.0.**
 > Native XUSB interception now runs below the Windows function driver, preserving its input-consumer behavior.
 > Real browser, Windows game-controller panel and Search tests passed with controlled Windows 11 virtual devices. [Validation and remaining limits](docs/KNOWN-ISSUES.md).
 
@@ -38,6 +38,9 @@ The Microsoft signature covers the driver package, not the installer or example 
 
 ## What changed
 
+**1.0.6.1 fixes installation:** unrelated historical Xbox HID views no longer abort legacy cleanup, valid empty filter lists are accepted, and an unbound control endpoint is reused on retry. Incomplete recovery keeps the driver package available. Errors identify the failing setup stage and device. The signed kernel remains **1.0.4.0**.
+
+
 Kernel **1.0.4.0** replaces the legacy XUSB upper backend with a USB lower filter.
 Windows keeps ownership of native XInput / Windows.Gaming.Input requests, foreground policy and translated HID views.
 The SDK discovers XUSB through the central endpoint, without requiring the former native-source or secondary-HID-mirror startup handshake.
@@ -53,17 +56,17 @@ These are bounded Windows 11 virtual-device tests. The reported physical-control
 
 ## Downloads and source
 
-The [complete 1.0.6.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
-Bundle version **1.0.6.0** contains kernel **1.0.4.0** and the updated two-file SDK.
+The [complete 1.0.6.1 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
+Bundle version **1.0.6.1** contains kernel **1.0.4.0** and the updated two-file SDK.
 
 | File | Contents |
 | --- | --- |
 | `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
 | `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
 | `InterceptorExampleUI.exe` | Standalone input viewer with embedded bridge |
-| `Interceptor-Gamepad-Controller-1.0.6.0-demo.zip` | Complete installers, viewer and console examples |
-| `Interceptor-Gamepad-Controller-1.0.6.0-demo-SDK.zip` | SDK, example and installer source |
-| `Interceptor-Gamepad-Controller-1.0.6.0-Examples.zip` | Viewer and console examples |
+| `Interceptor-Gamepad-Controller-1.0.6.1-demo.zip` | Complete installers, viewer and console examples |
+| `Interceptor-Gamepad-Controller-1.0.6.1-demo-SDK.zip` | SDK, example and installer source |
+| `Interceptor-Gamepad-Controller-1.0.6.1-Examples.zip` | Viewer and console examples |
 | `SHA256SUMS.txt` | Download checksums |
 
 ```text

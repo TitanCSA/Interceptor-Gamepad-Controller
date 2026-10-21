@@ -1,6 +1,6 @@
 # Input viewer diagnostics
 
-Use the [complete 1.0.6.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.0-demo),
+Use the [complete 1.0.6.1 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo),
 which includes signed kernel **1.0.4.0** and user-mode applications rebuilt with the updated SDK.
 The native bridge is embedded in `InterceptorExampleUI.exe`; no separate DLL is needed.
 Use this release's installer to update the kernel, then finish all requested restart/reopen steps.

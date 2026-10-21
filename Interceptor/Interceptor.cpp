@@ -1839,8 +1839,12 @@ DWORD RememberRestart() {
     const DWORD flag=1;status=RegSetValueExW(key,L"Required",0,REG_DWORD,reinterpret_cast<const BYTE*>(&flag),sizeof(flag));
     RegCloseKey(key);return static_cast<DWORD>(status);
 }
-void RecordError(Init_Result& result,DWORD error) {
-    if(!result.error)result.error=error?error:ERROR_GEN_FAILURE;
+void RecordError(Init_Result& result,DWORD error,const char* detail=nullptr,const std::wstring& device={}) {
+    if(!result.error) {
+        result.error=error?error:ERROR_GEN_FAILURE;
+        if(detail)result.error_detail=detail;
+        result.error_device=device;
+    }
 }
 bool IsAdministrator() {
     SID_IDENTIFIER_AUTHORITY authority=SECURITY_NT_AUTHORITY;PSID sid=nullptr;BOOL member=FALSE;
@@ -2080,7 +2084,7 @@ void AssociateControllers(Init_Result& result,bool remove) {
         ULONG status=0,problem=0;
         if(CM_Get_DevNode_Status(&status,&problem,device.DevInst,0)==CR_SUCCESS && (status&DN_STARTED))result.reboot_required=true;
         else if(!remove)result.reboot_required=true;
-    } catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()));}
+    } catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()),e.what(),id);}
 }
 
 // ---- NativeDevices.inl ----
@@ -2117,16 +2121,22 @@ std::vector<std::wstring> NativeClassFilters(const GUID& deviceClass,DWORD prope
         if(missing(deviceClass,property))return {};
         throw std::system_error(ERROR_INVALID_DATA,std::system_category(),"Unreadable existing native class filters");
     }
-    if((!queried && error!=ERROR_INSUFFICIENT_BUFFER) || bytes<2*sizeof(wchar_t) ||
+    if((!queried && error!=ERROR_INSUFFICIENT_BUFFER) || bytes<sizeof(wchar_t) ||
        bytes>65536 || bytes%sizeof(wchar_t))
         throw std::system_error(static_cast<int>(!queried && error!=ERROR_INSUFFICIENT_BUFFER?error:ERROR_INVALID_DATA),
             std::system_category(),"Read native class filters size");
     std::vector<wchar_t> data(bytes/sizeof(wchar_t));const DWORD capacity=bytes;
     if(!query(&deviceClass,property,&type,reinterpret_cast<BYTE*>(data.data()),capacity,&bytes,nullptr,nullptr))
         throw std::system_error(GetLastError(),std::system_category(),"Read native class filters");
-    if(type!=REG_MULTI_SZ || bytes<2*sizeof(wchar_t) || bytes>capacity || bytes%sizeof(wchar_t))
+    if(type!=REG_MULTI_SZ || bytes<sizeof(wchar_t) || bytes>capacity || bytes%sizeof(wchar_t))
         throw std::system_error(ERROR_INVALID_DATA,std::system_category(),"Invalid native class filter type/size");
     const auto length=bytes/sizeof(wchar_t);
+    // An empty REG_MULTI_SZ is one empty string (a single NUL). Nonempty
+    // sequences still require the final string terminator plus the list NUL.
+    if(length==1) {
+        if(!data[0])return {};
+        throw std::system_error(ERROR_INVALID_DATA,std::system_category(),"Unterminated native class filters");
+    }
     if(data[length-1] || data[length-2])
         throw std::system_error(ERROR_INVALID_DATA,std::system_category(),"Unterminated native class filters");
     std::vector<std::wstring> result;std::size_t at=0;
@@ -2227,7 +2237,9 @@ void AssociateNativeControllers(Init_Result& result,const IC_CAPABILITIES* capab
         const auto classUpper=NativeClassFilters(device.ClassGuid,SPCRP_UPPERFILTERS);
         const auto classLower=NativeClassFilters(device.ClassGuid,SPCRP_LOWERFILTERS);
         const auto placement=Policy::ClassFilterAssociation(transport,upper,lower,classUpper,classLower);
-        if(placement==Policy::ClassAssociation::Conflict) {RecordError(result,ERROR_INVALID_DATA);continue;}
+        if(placement==Policy::ClassAssociation::Conflict) {
+            RecordError(result,ERROR_INVALID_DATA,"Conflicting native class/device filter placement",id);continue;
+        }
         if(transport==IC_CONTROLLER_XUSB) {
             if(ConfigureXusbUsbFilters(result,upper,lower,[&](DWORD property,const auto& filters){WriteNativeFilters(set.value,device,property,filters);}))++result.associated;
             else {
@@ -2240,7 +2252,7 @@ void AssociateNativeControllers(Init_Result& result,const IC_CAPABILITIES* capab
         if(Policy::Has(gip?upper:lower,IC_SDK_SERVICE)) {
             // Do not introduce two Interceptor instances on one stack. A legacy
             // wrong-side association needs explicit uninstall/reinstall first.
-            RecordError(result,ERROR_INVALID_DATA);continue;
+            RecordError(result,ERROR_INVALID_DATA,"Interceptor registered on the unexpected native filter side",id);continue;
         }
         const auto property=gip?SPDRP_LOWERFILTERS:SPDRP_UPPERFILTERS;
         const auto& original=gip?lower:upper;
@@ -2256,29 +2268,12 @@ void AssociateNativeControllers(Init_Result& result,const IC_CAPABILITIES* capab
             // restart reconstructs the stack; never restart a controller here.
             result.reboot_required=true;
         }
-    } catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()));}
+    } catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()),e.what(),id);}
 }
 
 // ---- XusbMirrors.inl ----
-// Per-instance binding of the private XUSB HID mirror. Parent identities come
-// from Configuration Manager, never from a same-VID/PID search or player index.
-Policy::NativeNode ReadNativeNode(HDEVINFO set,SP_DEVINFO_DATA& device,const std::wstring& id) {
-    Policy::NativeNode n;n.instance=id;n.deviceClass=Property(set,device,SPDRP_CLASSGUID);
-    try {n.service=Property(set,device,SPDRP_SERVICE);}
-    catch(const std::system_error& e) {if(e.code().value()!=ERROR_INVALID_DATA && e.code().value()!=ERROR_FILE_NOT_FOUND)throw;}
-    n.upper=FilterNames(MultiProperty(set,device,SPDRP_UPPERFILTERS));
-    n.hardware=FilterNames(MultiProperty(set,device,SPDRP_HARDWAREID));
-    n.compatible=FilterNames(MultiProperty(set,device,SPDRP_COMPATIBLEIDS));return n;
-}
-bool MirrorParents(HDEVINFO set,SP_DEVINFO_DATA& child,const std::wstring& id,Policy::NativeNode& hid,Policy::NativeNode& xusb) {
-    DEVINST parent=0,grandparent=0;wchar_t parentId[MAX_DEVICE_ID_LEN]{},grandparentId[MAX_DEVICE_ID_LEN]{};
-    if(CM_Get_Parent(&parent,child.DevInst,0)!=CR_SUCCESS || CM_Get_Parent(&grandparent,parent,0)!=CR_SUCCESS ||
-       CM_Get_Device_IDW(parent,parentId,MAX_DEVICE_ID_LEN,0)!=CR_SUCCESS || CM_Get_Device_IDW(grandparent,grandparentId,MAX_DEVICE_ID_LEN,0)!=CR_SUCCESS)return false;
-    SP_DEVINFO_DATA p{};p.cbSize=sizeof(p);SP_DEVINFO_DATA g{};g.cbSize=sizeof(g);
-    if(!SetupDiOpenDeviceInfoW(set,parentId,nullptr,0,&p) || !SetupDiOpenDeviceInfoW(set,grandparentId,nullptr,0,&g))return false;
-    hid=ReadNativeNode(set,p,parentId);xusb=ReadNativeNode(set,g,grandparentId);
-    return Policy::XusbMirror(ReadNativeNode(set,child,id),hid,xusb);
-}
+// Cleanup is authorized by this product's own identity marker or filter, not
+// by unrelated ancestry. Historical HID views may have classless ghost parents.
 struct MirrorRegistry {
     HKEY value;
     ~MirrorRegistry(){if(value!=INVALID_HANDLE_VALUE)RegCloseKey(value);}
@@ -2293,8 +2288,7 @@ bool RemoveMirrorIdentity(HKEY key,Init_Result& result,bool started,decltype(&Re
     return changed;
 }
 void CleanupLegacyXusbMirrors(Init_Result& result) {
-    // Include absent instances. Only legacy XUSB views with our own identity
-    // marker or a verified native XUSB ancestry are eligible; GIP views stay out.
+    // Include absent instances, but touch only our own legacy mirror state.
     DeviceSet snapshot{SetupDiGetClassDevsW(&GUID_DEVCLASS_HIDCLASS,nullptr,nullptr,0)};
     if(snapshot.value==INVALID_HANDLE_VALUE){RecordError(result,GetLastError());return;}
     std::vector<std::wstring> ids;
@@ -2316,18 +2310,20 @@ void CleanupLegacyXusbMirrors(Init_Result& result) {
             if(status==ERROR_SUCCESS||status==ERROR_MORE_DATA)marked=true;
             else if(status!=ERROR_FILE_NOT_FOUND)throw std::system_error(status,std::system_category(),"Read legacy XUSB mirror marker");
         }
-        Policy::NativeNode hid,xusb;
-        if(!marked&&!MirrorParents(set.value,d,id,hid,xusb))continue;
+        const auto upper=FilterNames(MultiProperty(set.value,d,SPDRP_UPPERFILTERS));
+        const auto lower=FilterNames(MultiProperty(set.value,d,SPDRP_LOWERFILTERS));
+        if(!marked && ((!Policy::Has(upper,IC_SDK_SERVICE)&&!Policy::Has(lower,IC_SDK_SERVICE)) ||
+           Policy::Has(upper,L"xinputhid")))continue;
         ULONG state=0,problem=0;const bool started=CM_Get_DevNode_Status(&state,&problem,d.DevInst,0)==CR_SUCCESS&&(state&DN_STARTED);
         bool changed=false;
         for(const auto property:{SPDRP_UPPERFILTERS,SPDRP_LOWERFILTERS}) {
-            const auto original=FilterNames(MultiProperty(set.value,d,property));
+            const auto& original=property==SPDRP_UPPERFILTERS?upper:lower;
             const auto cleaned=Policy::Filters(original,0,true);
             if(cleaned!=original){WriteNativeFilters(set.value,d,property,cleaned);changed=true;result.reboot_required|=started;}
         }
         changed=RemoveMirrorIdentity(key.value,result,started)||changed;
         if(changed)++result.associated;
-    }catch(const std::system_error& error){RecordError(result,static_cast<DWORD>(error.code().value()));}
+    }catch(const std::system_error& error){RecordError(result,static_cast<DWORD>(error.code().value()),error.what(),id);}
 }
 void CleanupLegacyXusbClassFilters(Init_Result& result) {
     // Historical laboratory/legacy XNA class placement is no longer a capture
@@ -2347,7 +2343,7 @@ void CleanupLegacyXusbClassFilters(Init_Result& result) {
         if(!SetupDiSetClassRegistryPropertyW(&xna,property,cleaned.empty()?nullptr:reinterpret_cast<const BYTE*>(data.data()),cleaned.empty()?0:static_cast<DWORD>(data.size()*sizeof(wchar_t)),nullptr,nullptr))
             throw std::system_error(GetLastError(),std::system_category(),"Remove legacy XUSB class filter");
         ++result.associated;result.reboot_required=true;
-    }catch(const std::system_error& error){RecordError(result,static_cast<DWORD>(error.code().value()));}
+    }catch(const std::system_error& error){RecordError(result,static_cast<DWORD>(error.code().value()),error.what(),L"Setup class {D61CA365-5AF4-4486-998B-9DB4734C6CA3}");}
 }
 void CleanupLegacyXusb(Init_Result& result) {
     CleanupLegacyXusbClassFilters(result);CleanupLegacyXusbMirrors(result);
@@ -2357,14 +2353,14 @@ void CleanupLegacyXusb(Init_Result& result) {
 static Init_Result Initialize() {
     static std::mutex mutex;std::lock_guard<std::mutex> guard(mutex);
     Init_Result result;
-    if(!IsAdministrator()) {result.error=ERROR_ACCESS_DENIED;return result;}
+    if(!IsAdministrator()) {RecordError(result,ERROR_ACCESS_DENIED,"Initialization requires administrator rights");return result;}
     MutexHandle interprocess{CreateMutexW(nullptr,FALSE,L"Global\\InterceptorGamepadController.InitAllDevices"),false};
-    if(!interprocess.value) {result.error=GetLastError();return result;}
+    if(!interprocess.value) {RecordError(result,GetLastError(),"Create initialization mutex");return result;}
     const DWORD wait=WaitForSingleObject(interprocess.value,30000);
-    if(wait!=WAIT_OBJECT_0 && wait!=WAIT_ABANDONED) {result.error=wait==WAIT_TIMEOUT?ERROR_BUSY:GetLastError();return result;}
+    if(wait!=WAIT_OBJECT_0 && wait!=WAIT_ABANDONED) {RecordError(result,wait==WAIT_TIMEOUT?ERROR_BUSY:GetLastError(),"Wait for another initialization to finish");return result;}
     interprocess.owned=true;
     result.error=PendingRestart(result.reboot_required);
-    if(result.error)return result;
+    if(result.error) {result.error_detail="Read pending Windows restart state";return result;}
     if(result.reboot_required)return result;
     // Snapshot instance IDs before changing stacks; updating one device can
     // invalidate an ongoing enumeration. Reopen and recheck each instance.
@@ -2388,7 +2384,7 @@ static Init_Result Initialize() {
         SP_DEVINFO_DATA device{};device.cbSize=sizeof(device);
         if(!SetupDiOpenDeviceInfoW(devices.value,target.id.c_str(),nullptr,0,&device)) {RecordError(result,GetLastError());continue;}
         try {Associate(devices.value,device,target.mouse,result);}
-        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()));}
+        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()),e.what(),target.id);}
     }
     #endif
 #if IC_PRODUCT_HAS_CONTROLLERS
@@ -2407,15 +2403,15 @@ static Init_Result Initialize() {
             if(!result.error)AssociateControllers(result,false);
             if(!result.error)AssociateNativeControllers(result,available?&capabilities:nullptr,false);
         }
-        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()));}
+        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()),e.what());}
     }
     #endif
     if(result.reboot_required) {
-        const DWORD error=RememberRestart();if(error)RecordError(result,error);
+        const DWORD error=RememberRestart();if(error)RecordError(result,error,"Record required Windows restart");
     }
     if(!result.error && !result.reboot_required) {
-        try {if(Get_Status().version!=IC_VERSION)RecordError(result,ERROR_REVISION_MISMATCH);}
-        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()));}
+        try {if(Get_Status().version!=IC_VERSION)RecordError(result,ERROR_REVISION_MISMATCH,"Verify driver ABI after association");}
+        catch(const std::system_error& e) {RecordError(result,static_cast<DWORD>(e.code().value()),e.what());}
     }
     result.ready=!result.error && !result.reboot_required;
     return result;
@@ -2423,7 +2419,7 @@ static Init_Result Initialize() {
 // Installer helper. Caller must be elevated and serialize setup operations.
 static Init_Result RestoreFilters() {
     Init_Result result;
-    if(!IsAdministrator()) {result.error=ERROR_ACCESS_DENIED;return result;}
+    if(!IsAdministrator()) {RecordError(result,ERROR_ACCESS_DENIED,"Restoration requires administrator rights");return result;}
 #if IC_PRODUCT_HAS_CONTROLLERS
     AssociateControllers(result,true);AssociateNativeControllers(result,nullptr,true);CleanupLegacyXusb(result);
 #endif

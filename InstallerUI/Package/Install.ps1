@@ -34,12 +34,16 @@ try {
     Write-Host 'Interceptor Gamepad / Controller installed. Les entrees passent normalement tant qu aucun contexte ne capture.'
 } catch {
     Write-Host $_.Exception.Message
+    $restorationComplete=$true
     if($bindingStarted) {
         Write-Host 'Tentative de retour aux pilotes HID Windows...'
         & (Join-Path $PSScriptRoot 'Payload\InterceptorExample.exe') --restore
-        if($LASTEXITCODE -notin @(0,3010)) { Write-Host 'Restauration incomplete: utiliser Desinstaller.bat en mode sans echec.' }
+        $restorationComplete=$LASTEXITCODE -in @(0,3010)
+        if(!$restorationComplete) {
+            Write-Host ('Input restoration failed ('+$LASTEXITCODE+'). Driver packages, control endpoint and recovery files are retained because input stacks may still reference the driver. Retry Install / reinstall with the corrected installer or export diagnostics.')
+        }
     }
-    if($stagingStarted) {
+    if($stagingStarted -and $restorationComplete) {
         try {
             foreach($package in (Get-InterceptorPackages | Where-Object { $_.Driver -notin $existingPackages })) {
                 Remove-InterceptorPackage $package.Driver

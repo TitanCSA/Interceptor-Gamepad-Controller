@@ -4,10 +4,25 @@
 #include <string>
 #include <system_error>
 #include <atomic>
+#include <iomanip>
 
 int InstallDriver(const wchar_t* directory,bool restore,bool onlyNew=false,const wchar_t* mouseInf=nullptr,const wchar_t* controlInf=nullptr);
 int ConfigureControlDriver(const wchar_t* inf,bool remove);
 namespace {
+void PrintInitializationFailure(const Interceptor::Init_Result& result) {
+    if(!result.error)return;
+    std::cerr<<"Controller initialization failed [Win32 "<<std::dec<<result.error<<" / 0x"<<std::hex<<std::uppercase
+        <<std::setw(8)<<std::setfill('0')<<result.error<<std::dec<<"]\n";
+    if(!result.error_detail.empty())std::cerr<<"Stage: "<<result.error_detail<<'\n';
+    if(!result.error_device.empty()) {
+        const auto count=WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,result.error_device.c_str(),-1,nullptr,0,nullptr,nullptr);
+        if(count>0) {
+            std::string device(static_cast<std::size_t>(count),'\0');
+            if(WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,result.error_device.c_str(),-1,device.data(),count,nullptr,nullptr)>0)
+                std::cerr<<"Device or class: "<<device.c_str()<<'\n';
+        }
+    }
+}
 bool UsbXusbBackendLoaded(const IC_CAPABILITIES& capabilities) {
     return (capabilities.controller_mask&IC_CONTROLLER_XUSB)!=0 &&
         (capabilities.xusb_profiles&4u)!=0 && (capabilities.xusb_profiles&3u)!=0;
@@ -39,7 +54,7 @@ int wmain(int argc,wchar_t** argv) {
                 "Restart Windows and reopen this installer before completing associations.\n";
             return ERROR_SUCCESS_REBOOT_REQUIRED;
         }
-        if(mode==L"--associate-controllers"){const auto r=Init_AllDevices();return r.error?static_cast<int>(r.error):r.ready?0:ERROR_SUCCESS_REBOOT_REQUIRED;}
+        if(mode==L"--associate-controllers"){const auto r=Init_AllDevices();PrintInitializationFailure(r);return r.error?static_cast<int>(r.error):r.ready?0:ERROR_SUCCESS_REBOOT_REQUIRED;}
         if(mode==L"--install-control" && argc==3)return ConfigureControlDriver(argv[2],false);
         if(mode==L"--remove-control" && argc==2)return ConfigureControlDriver(nullptr,true);
         if(mode==L"--install" && argc==3)return InstallDriver(argv[2],false);
@@ -50,6 +65,7 @@ int wmain(int argc,wchar_t** argv) {
             const auto r=Init_AllDevices();
             std::cout<<"Associated="<<r.associated<<"; already associated="<<r.already_associated<<"; skipped="<<r.skipped
                 <<"; restart required="<<r.reboot_required<<"; ready="<<r.ready<<"; error="<<r.error<<'\n';
+            PrintInitializationFailure(r);
             return r.error?static_cast<int>(r.error):r.ready?0:ERROR_SUCCESS_REBOOT_REQUIRED;
         }
         if(mode==L"--restore")return InstallDriver(nullptr,true);
@@ -76,6 +92,9 @@ int wmain(int argc,wchar_t** argv) {
         return mode==L"--help"?0:ERROR_INVALID_PARAMETER;
     } catch(const std::system_error& e) {
         if(e.code().value()==ERROR_OPERATION_ABORTED) { std::cout<<"Capture revoked; normal input restored.\n";return 0; }
-        std::cerr<<e.what()<<"\n";return 1;
+        const auto code=static_cast<unsigned long>(e.code().value());
+        std::cerr<<e.what()<<" [Win32 "<<std::dec<<code<<" / 0x"<<std::hex<<std::uppercase
+            <<std::setw(8)<<std::setfill('0')<<code<<"]\n";
+        return code && code<=65535?static_cast<int>(code):1;
     } catch(const std::exception& e) { std::cerr<<e.what()<<"\n";return 1; }
 }

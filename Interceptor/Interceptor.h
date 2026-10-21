@@ -22,7 +22,7 @@
 #define IC_SDK_SERVICE L"InterceptorGamepadController"
 #define IC_SDK_DOS_DEVICE L"\\\\.\\InterceptorGamepadController"
 
-// Interceptor SDK 1.0.4.0. Compile Interceptor.cpp once alongside your application.
+// Interceptor SDK 1.0.4.1. Compile Interceptor.cpp once alongside your application.
 // This header has no local-header dependencies. Windows x64, C++17.
 
 // ---- Interceptor.h ----
@@ -573,6 +573,10 @@ struct Init_Result {
     std::uint32_t associated=0,already_associated=0,skipped=0;
     DWORD error=ERROR_SUCCESS;
     std::vector<Init_Skip_Diagnostic> skipped_devices;
+    // First setup failure, including the operation and exact device when known.
+    // Empty on success. Reading input never performs this diagnostic work.
+    std::string error_detail;
+    std::wstring error_device;
 };
 struct Send_Result {
     std::size_t accepted=0;DWORD error=ERROR_SUCCESS;
