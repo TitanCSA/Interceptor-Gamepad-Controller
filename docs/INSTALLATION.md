@@ -1,7 +1,7 @@
 # Installation, diagnostics and recovery
 
-The [complete 1.0.6.1 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo)
-contains Microsoft-signed kernel **1.0.4.0**, rebuilt examples and the updated SDK.
+The [complete 1.0.7.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo)
+contains Microsoft-signed kernel **1.0.5.0**, rebuilt examples and the updated SDK.
 The two-hour allowance is unchanged. Test signing and development certificates are not required.
 The Microsoft signature covers the driver package, not the installer or example EXEs.
 
@@ -38,7 +38,7 @@ The same installer resumes that work; no scheduled installation or RunOnce conti
 
 ## Recover an earlier failed installation
 
-If 1.0.6.0 ended with error 13, followed by a stopped driver or a root-control creation error, run **Install / reinstall** using **1.0.6.1**. It skips unrelated historical Xbox HID views during legacy cleanup, accepts valid empty Windows filter lists and reuses this product's unbound control endpoint. A manual registry cleanup is unnecessary for that case. Restart only when requested.
+If 1.0.6.0 ended with error 13, followed by a stopped driver or a root-control creation error, run **Install / reinstall** using **1.0.7.0**. It skips unrelated historical Xbox HID views during legacy cleanup, accepts valid empty Windows filter lists and reuses this product's unbound control endpoint. A manual registry cleanup is unnecessary for that case. Restart only when requested.
 
 If restoration fails, the installer keeps the staged package and recovery tools available, and logs the failing stage, device and numeric Windows error. Include the exported log when reporting a different failure.
 

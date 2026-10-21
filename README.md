@@ -2,9 +2,9 @@
 
 **Microsoft-signed Windows kernel-mode input filter driver for HID, XInput / XUSB, XInputHID and GIP gamepad / controller input, with a two-file C++17 SDK.**
 
-> **[1.0.6.1 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo) · signed kernel 1.0.4.0.**
+> **[1.0.7.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo) · signed kernel 1.0.5.0; SDK 1.0.4.2.**
 > Native XUSB interception now runs below the Windows function driver, preserving its input-consumer behavior.
-> Real browser, Windows game-controller panel and Search tests passed with controlled Windows 11 virtual devices. [Validation and remaining limits](docs/KNOWN-ISSUES.md).
+> Earlier kernel 1.0.4.0 browser, Windows game-controller panel and Search tests passed with controlled Windows 11 virtual devices. [Validation and remaining limits](docs/KNOWN-ISSUES.md).
 
 Receive input, identify its source, read or change it, then forward it through one API.
 Windows 10 1709+ / Windows 11 **x64**; installation and capture require administrator rights.
@@ -38,7 +38,9 @@ The Microsoft signature covers the driver package, not the installer or example 
 
 ## What changed
 
-**1.0.6.1 fixes installation:** unrelated historical Xbox HID views no longer abort legacy cleanup, valid empty filter lists are accepted, and an unbound control endpoint is reused on retry. Incomplete recovery keeps the driver package available. Errors identify the failing setup stage and device. The signed kernel remains **1.0.4.0**.
+**1.0.7.0 adds passive driver IN / OUT telemetry:** observe reports received by the filter and successful completions towards Windows, independently of capture and scripts. It does not start the two-hour capture allowance. [Measurement boundaries and limits](docs/PASSIVE-MONITOR.md). The live interface is in [GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper); the SDK capture API and classic viewer keep their existing behavior.
+
+The installation and recovery fixes from **1.0.6.1** are retained: unrelated historical Xbox HID views are skipped, valid empty filter lists are accepted, an unbound control endpoint is reused, and incomplete recovery preserves the package. Setup failures identify the stage and device; the rebuilt helper uses SDK **1.0.4.2**.
 
 
 Kernel **1.0.4.0** replaces the legacy XUSB upper backend with a USB lower filter.
@@ -49,24 +51,24 @@ All supplied user-mode applications are rebuilt with the updated SDK.
 Rebuild custom applications with this release's **Interceptor.h + Interceptor.cpp**.
 Wire ABI 4 is retained, but older compiled clients can still attempt the obsolete XUSB source/mirror startup path.
 
-Validation used real Windows consumers, including the default browser Gamepad API, actual `joy.cpl` tester windows and a real Search mouse click.
+Earlier kernel **1.0.4.0** consumer tests used the default browser Gamepad API, actual `joy.cpl` tester windows and a real Search mouse click.
 Independent Windows.Gaming.Input readings also confirmed modified XUSB/GIP inputs sent during quiet periods and restoration after normal close and abrupt client termination.
 These are bounded Windows 11 virtual-device tests. The reported physical-controller and Windows 10 Search cases still require verification on that hardware.
 [Details](docs/KNOWN-ISSUES.md).
 
 ## Downloads and source
 
-The [complete 1.0.6.1 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
-Bundle version **1.0.6.1** contains kernel **1.0.4.0** and the updated two-file SDK.
+The [complete 1.0.7.0 release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo) includes every download below, including rebuilt examples and both installers; no earlier release is needed.
+Bundle **1.0.7.0** contains signed kernel **1.0.5.0**, SDK/viewer **1.0.4.2** and installers **1.0.7.0**.
 
 | File | Contents |
 | --- | --- |
 | `InterceptorSetup.exe` | Standalone graphical installer and diagnostics |
 | `InterceptorSetupConsole.exe` | Standalone `/install` and `/uninstall` installer |
 | `InterceptorExampleUI.exe` | Standalone input viewer with embedded bridge |
-| `Interceptor-Gamepad-Controller-1.0.6.1-demo.zip` | Complete installers, viewer and console examples |
-| `Interceptor-Gamepad-Controller-1.0.6.1-demo-SDK.zip` | SDK, example and installer source |
-| `Interceptor-Gamepad-Controller-1.0.6.1-Examples.zip` | Viewer and console examples |
+| `Interceptor-Gamepad-Controller-1.0.7.0-demo.zip` | Complete installers, viewer and console examples |
+| `Interceptor-Gamepad-Controller-1.0.7.0-demo-SDK.zip` | SDK, example and installer source |
+| `Interceptor-Gamepad-Controller-1.0.7.0-Examples.zip` | Viewer and console examples |
 | `SHA256SUMS.txt` | Download checksums |
 
 ```text
@@ -88,7 +90,7 @@ Builds embed the supplied signed driver and precompiled recovery binaries.
 ## Two-hour demo
 
 **Two hours per Windows boot**, starting with the first successful capture, shared across this edition's applications.
-Sleep time counts. Closing applications, uninstalling or reinstalling does not reset the allowance; diagnostics that create a capture can start it.
+Sleep time counts. Closing applications, uninstalling or reinstalling does not reset the allowance; diagnostics that create a capture can start it. Passive IN / OUT observation does not create a capture or start the allowance, and remains available after capture expiry.
 At expiry, captures are revoked, new capture/injection is refused, and physical input continues normally.
 Use Windows **Restart** for a new allowance; Fast Startup shutdown does not reset the kernel boot.
 For the **full version without the demo time limit**, DM **`titancsa`** on Discord.

@@ -2,7 +2,7 @@
 
 Use this edition's `Interceptor.h` and compile `Interceptor.cpp` exactly once.
 Windows x64, C++17, `namespace Interceptor`; run capture applications elevated.
-The SDK connects only to this product's own driver endpoint.
+The SDK connects only to this product's own driver endpoint. SDK **1.0.4.2** keeps the capture API below unchanged; kernel **1.0.5.0** also exposes a separate [passive monitor protocol](PASSIVE-MONITOR.md), used by GamePad Remapper rather than an automatic SDK capture.
 
 ## Initialization and input
 

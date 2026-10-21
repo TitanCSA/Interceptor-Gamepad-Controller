@@ -1,8 +1,18 @@
 # Validation and remaining limits
 
-[Release 1.0.6.1](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.6.1-demo)
-contains Microsoft-signed kernel **1.0.4.0**, the updated C++ SDK and rebuilt user-mode applications.
+[Release 1.0.7.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.7.0-demo)
+contains Microsoft-signed kernel **1.0.5.0**, SDK/viewer **1.0.4.2** and installers **1.0.7.0**.
 The two-hour demo allowance is unchanged.
+
+## Passive telemetry in 1.0.7.0
+
+Kernel **1.0.5.0** adds independent, read-only IN / OUT observation used by GamePad Remapper 2.2.4. IN is a report received on a filtered controller stack before changes at that layer; OUT is a successful completion from that filter towards Windows. A successful SDK send or queue insertion is not itself an OUT measurement. Capture and its demo allowance are unchanged. [Measurement details](PASSIVE-MONITOR.md).
+
+The exact production kernel body was exercised with a laboratory signature in an isolated Windows 11 VM under Driver Verifier. Controlled HID, XUSB and GIP sources produced decoded passive IN / OUT without starting the capture trial. Applying a script changed OUT; Stop kept observation active. Independent analysis found zero mismatches in 191 fresh modified and 192 post-Stop XUSB snapshots, 191/192 in the native GIP run, and 179/228 each for HID and GIP in a second run. Initial unknown, stale egress and transition samples were explicitly excluded; these counts are not polling-rate or latency measurements. No ring loss was observed in those bounded runs.
+
+The returned Microsoft-signed 1.0.5.0 package was then installed in a separate Windows 11 VM pass: setup requested a normal restart (3010), reinstallation completed (0), and the loaded SYS matched the signed release hash with successful kernel/catalog signature verification. A passive XUSB/GIP probe recorded 601 snapshots, including 191 fresh modified and 191 fresh post-Stop snapshots for each family. The real Remapper UI showed physical HID/GIP IN, script-modified OUT, then matching IN/OUT after Stop while observation continued; three copied diagnostic reports contained no loss or monitor fault. The VM baseline had test mode enabled: these checks verify the returned package and runtime behavior, not a test-mode-off or Secure Boot certification.
+
+The returned Microsoft package is separately checked for embedded/catalog signatures, catalog membership, identical INF and identical executable content. Live XInputHID, power/hotplug and foreign-capture transitions were not repeated in that VM run; isolated regression tests exercise their implemented boundaries. The user's physical controllers remain unverified. The earlier native-consumer tests below describe kernel 1.0.4.0, whose transparent XUSB backend is retained; they are not a new universal compatibility certification for 1.0.5.0.
 
 ## Installation failure in 1.0.6.0
 
@@ -25,7 +35,7 @@ The SDK no longer needs the legacy XUSB native-source/secondary-HID-mirror start
 | --- | --- | --- |
 | Earlier 1.0.4.0 demo | 1.0.2.0 | Regression reproduced |
 | Earlier 1.0.5.0 preview | 1.0.3.0 | Regression reproduced |
-| Current 1.0.6.1 demo | 1.0.4.0 | Both virtual XUSB and GIP controllers matched expected input |
+| Earlier 1.0.6.1 demo | 1.0.4.0 | Both virtual XUSB and GIP controllers matched expected input |
 
 Older downloads remain historical artifacts; replacing only a viewer cannot update their installed kernel.
 

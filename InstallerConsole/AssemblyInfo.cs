@@ -1,8 +1,8 @@
 using System.Reflection;
 using System.Runtime.Versioning;
 [assembly: AssemblyTitle("Interceptor Console Setup")]
-[assembly: AssemblyDescription("Console entry point for the shared Interceptor Gamepad / Controller installedr")]
+[assembly: AssemblyDescription("Console entry point for the shared Interceptor Gamepad / Controller installer")]
 [assembly: AssemblyProduct("InterceptorGamepadController")]
-[assembly: AssemblyVersion("1.0.4.1")]
-[assembly: AssemblyFileVersion("1.0.4.1")]
+[assembly: AssemblyVersion("1.0.7.0")]
+[assembly: AssemblyFileVersion("1.0.7.0")]
 [assembly: TargetFramework(".NETFramework,Version=v4.6")]
