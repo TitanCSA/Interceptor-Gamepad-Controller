@@ -62,8 +62,8 @@ views; the setup table is not a count of physical gamepads.
 
 For continuous **physical IN / driver OUT** inspection and script-based remapping,
 use [GamePad Remapper](https://github.com/TitanCSA/GamePad-Remapper). Its passive
-monitor works without a running script or capture and does not start the demo
-timer. [What IN and OUT measure](docs/PASSIVE-MONITOR.md).
+monitor works without a running script or capture. Subscribing starts the same
+two-hour demo allowance. [What IN and OUT measure](docs/PASSIVE-MONITOR.md).
 
 ## Example applications
 
@@ -122,12 +122,12 @@ the driver has [separate terms](licenses/BINARY-LICENSE.txt).
 
 ## Demo edition
 
-**Two hours per Windows kernel boot**, starting with the first successful capture
+**Two hours per Windows kernel boot**, starting with the first capture or monitor subscription
 and shared across this edition's applications. Sleep time counts; closing or
 reinstalling does not reset it. Capture diagnostics can start the allowance.
 At expiry, captures are released and capture/injection stop; physical input passes
-through normally. Use Windows **Restart** for a new allowance. Passive IN / OUT
-monitoring remains available and does not start or reset this timer.
+through normally. Passive IN / OUT monitoring and raw GIP diagnostics follow the
+same deadline. Use Windows **Restart** for a new allowance.
 For the unrestricted version, DM **`titancsa`** on Discord.
 
 This independent project evolves the workflow popularized by

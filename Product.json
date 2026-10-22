@@ -1,13 +1,12 @@
 {
-  "Name": "Interceptor-Gamepad-Controller",
-  "DisplayName": "Interceptor Gamepad & Controller",
-  "Service": "InterceptorGamepadController",
-  "DriverFile": "InterceptorGamepadController.sys",
-  "Version": "1.0.5.0",
-  "InputMask": 0,
-  "ControllerMask": 15,
-  "Packages": [
-    "InterceptorGamepadControllerControl.inf"
-  ]
+    "Name":  "Interceptor-Gamepad-Controller",
+    "DisplayName":  "Interceptor Gamepad \u0026 Controller",
+    "Service":  "InterceptorGamepadController",
+    "DriverFile":  "InterceptorGamepadController.sys",
+    "Version":  "1.0.11.0",
+    "InputMask":  0,
+    "ControllerMask":  15,
+    "Packages":  [
+                     "InterceptorGamepadControllerControl.inf"
+                 ]
 }
-

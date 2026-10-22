@@ -1,8 +1,6 @@
 # Validation and remaining limits
 
-[Release 1.0.9.0](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.9.0-demo)
-contains Microsoft-signed kernel **1.0.5.0**, SDK **1.0.4.2**, viewer **1.0.4.3** and installers **1.0.9.0**.
-The two-hour demo allowance is unchanged.
+Current release: **1.0.11.0**, including the Microsoft-signed primary driver and resident clock; SDK **1.0.4.2**. See [current demo validation](DEMO-VALIDATION.md). Historical tests below describe the versions named in their sections; current monitor use starts and obeys the same two-hour allowance as capture.
 
 ## Passive telemetry in 1.0.7.0
 
