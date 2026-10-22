@@ -44,7 +44,26 @@ application; no SDK DLL is needed. Alternatively use `add_subdirectory()` and
 link `Interceptor::SDK`. See [API setup](API.md).
 The two editions use the same namespace; use the library matching your driver
 edition and do not link both alternative SDK implementations into one executable.
-The 1.0.7.0 bundle separates versions: Microsoft-signed kernel 1.0.5.0,
-SDK 1.0.4.2, viewer 1.0.4.3, installer wrappers 1.0.7.0. The two public SDK files
+The 1.0.9.0 bundle separates versions: Microsoft-signed kernel 1.0.5.0,
+SDK 1.0.4.2, viewer 1.0.4.3, installer wrappers 1.0.9.0. The two public SDK files
 remain sufficient for capture clients; passive telemetry is a separate read-only
 control protocol, with its client implementation in GamePad Remapper.
+
+## Installer regression checks
+
+The console installer build runs `InstallerUI/Tests/InstallerTests.ps1` automatically.
+It exercises the actual shared process runner and mocked installation/uninstallation
+transactions: immediate exits, concurrent stdout/stderr, argument quoting, bounded
+timeouts, PnP startup states, restart-required rollback and retention of recovery.
+The managed harness compiles the real package wrapper and checks extraction paths,
+callback failures and process lifetime. These tests do not install a driver.
+
+To run them independently:
+
+```powershell
+.\InstallerUI\Tests\InstallerTests.ps1 -ReportDirectory .\obj\InstallerTests
+```
+
+Real installation, reinstall, deferred uninstall and edition coexistence are also
+checked in a dedicated Windows VM. VM and fixture tests do not certify physical
+controller compatibility or measure input latency.

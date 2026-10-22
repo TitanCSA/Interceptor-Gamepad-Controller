@@ -1,6 +1,6 @@
 # Installation, diagnostics and recovery
 
-The [complete 1.0.8.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.8.0-demo)
+The [complete 1.0.9.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.9.0-demo)
 contains Microsoft-signed kernel **1.0.5.0**, rebuilt examples and the updated SDK.
 The two-hour allowance is unchanged. Test signing and development certificates are not required.
 The Microsoft signature covers the driver package, not the installer or example EXEs.
@@ -36,12 +36,6 @@ The installer checks the loaded backend before accepting completion.
 An older loaded backend keeps the operation pending rather than reporting success after skipping XUSB migration.
 The same installer resumes that work; no scheduled installation or RunOnce continuation is added.
 
-## Recover an earlier failed installation
-
-If 1.0.6.0 ended with error 13, followed by a stopped driver or a root-control creation error, run **Install / reinstall** using **1.0.8.0**. It skips unrelated historical Xbox HID views during legacy cleanup, accepts valid empty Windows filter lists and reuses this product's unbound control endpoint. A manual registry cleanup is unnecessary for that case. Restart only when requested.
-
-If restoration fails, the installer keeps the staged package and recovery tools available, and logs the failing stage, device and numeric Windows error. Include the exported log when reporting a different failure.
-
 ## Verify the connected devices
 
 Installation and capture require administrator rights. Compiling an example does not install the driver.
@@ -68,3 +62,37 @@ Their startup marker and recovery state use this product's own identity; consult
 
 Diagnostic exports can contain PnP instance IDs and controller protocol metadata.
 Remove serial numbers before sharing them publicly.
+
+## Setup safeguards and logs
+
+Both installers verify the embedded package before changing Windows and serialize
+maintenance across the Interceptor editions. They check authoritative PnP status
+twice before reporting a device as started. A device already disabled before setup
+is preserved and reported as unverified. Restart-required states are distinguished
+from startup failures, with the instance ID, problem code and failed stage in the log.
+
+If an operation fails, rollback restores this product's saved bindings. Driver
+packages and recovery tools remain available while restoration still needs a
+restart. Uninstall completes pending removal after the next normal Windows boot;
+it does not force-remove a package still referenced by a device. Windows commands
+have bounded deadlines. After a timeout, restart Windows before retrying, since a
+device operation may still be settling.
+
+Only this product's associations, packages and recovery state are removed.
+Keyboard/Mouse and Gamepad/Controller can coexist; the combined Interceptor edition
+must be removed before installing either split edition, and vice versa.
+
+| Exit code | Action |
+| --- | --- |
+| `0` | Completed |
+| `3010` | Restart Windows, then reopen setup if installation is pending |
+| `1618` | Another setup/recovery operation is active; wait and retry |
+| `1638` | Uninstall the conflicting Interceptor edition and restart |
+| `1460` | A Windows command timed out; keep recovery files and restart before retrying |
+| Other nonzero | Inspect the exact failing stage and numeric error in the log |
+
+The output includes the full transcript path under this edition's
+`%ProgramData%` directory. `state.json` records the current maintenance phase;
+`setup-devices.json` records bounded PnP verification history. The GUI can export
+diagnostics. Normal installation and uninstallation never restart Windows
+automatically; restart only when requested.

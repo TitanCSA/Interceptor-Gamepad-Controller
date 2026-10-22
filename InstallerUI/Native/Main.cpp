@@ -1,5 +1,6 @@
 #define IC_SDK_INTERNAL 1
 #include "Interceptor.h"
+#include "SetupHealth.h"
 #include <iostream>
 #include <string>
 #include <system_error>
@@ -42,6 +43,7 @@ int wmain(int argc,wchar_t** argv) {
     using namespace Interceptor;
     try {
         std::wstring mode=argc>1?argv[1]:L"--help";
+        if(mode==L"--setup-state" && argc==2)return SetupHealth::Print(L"ROOT\\InterceptorGamepadController");
         if(mode==L"--self-test-setup" && argc==2)return SetupPolicySelfTest();
         if(mode==L"--require-usb-backend" && argc==2) {
             try {
