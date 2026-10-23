@@ -1,81 +1,62 @@
-# Gamepad / controller C++ examples
+# Interceptor-Gamepad-Controller console examples
 
-## Controller examples
+Install this edition with **InterceptorSetup.exe**, restart Windows if requested,
+then run **one** example as administrator. Each program checks the driver before
+starting and explains its action in English. Close its console or press Ctrl+C to
+stop. Physical Ctrl+Alt+Delete is available if an intentional keyboard block
+suppresses shortcuts; that example also exits on Escape.
 
-Run **one capture program at a time**, as administrator, after installing this
-edition. All five programs receive **HID, XInput/XUSB, XInputHID and GIP** in the
-same automatic SDK session. Other input families and untouched fields are forwarded.
-The examples use physical device reports; they do not create virtual controllers.
+Each `.cpp` is independent: `Interceptor.h`, `Interceptor.cpp`, and standard/Windows
+headers are all it needs. There is no shared example runner or behavior header.
 
-| Source / executable | Behavior |
+| Source / executable | What it does |
 | --- | --- |
-| `Controller_01_Invert_Vertical` | Invert every identified stick Y axis, including repeated HID Y controls |
-| `Controller_02_Swap_Buttons` | Swap buttons in pairs; native A/B, X/Y, LB/RB, Back/Start, LS/RS, Up/Down, Left/Right |
-| `Controller_03_Instant_Triggers` | Any positive trigger pressure becomes 100%; released remains 0% |
-| `Controller_04_Deadzone_50` | 50% deadzone on each stick axis; rescale the remaining range to 0-100% |
-| `Controller_05_Inverse_Exponential` | Apply a root curve to sticks; default exponent 2 (square root) |
+| [Controller_01_Invert_Vertical.cpp](Controller_01_Invert_Vertical.cpp) | Invert every identified stick Y axis. Supports HID, XInput/XUSB, XInputHID and GIP. |
+| [Controller_02_Swap_Buttons.cpp](Controller_02_Swap_Buttons.cpp) | Swap controller buttons in pairs: 1/2, 3/4, and so on. Supports all controller families. |
+| [Controller_03_Instant_Triggers.cpp](Controller_03_Instant_Triggers.cpp) | Make any positive trigger pressure 100%. Supports HID, XInput/XUSB, XInputHID and GIP. |
+| [Controller_04_Deadzone_50.cpp](Controller_04_Deadzone_50.cpp) | Apply a 50% deadzone per stick axis and rescale the remaining range. Supports all families. |
+| [Controller_05_Inverse_Exponential.cpp](Controller_05_Inverse_Exponential.cpp) | Apply an inverse exponential stick curve (square root by default). Supports all families. |
 
-Each `.cpp` is a complete, independent program with only `Interceptor.h` and
-system/standard headers. Compile it with `Interceptor/Interceptor.cpp` and C++17;
-no shared behavior header is required. Build all with:
+## Receive, change, forward
 
-```powershell
-.\Build.ps1 -Target ExamplesConsole
+The essential HID Y axis operation is easy to follow:
+
+```cpp
+auto inputs = Get_Input_With_Timeout(INFINITE);
+for (auto& input : inputs)
+    if (auto* controller = input.Get<Controller_Hid_Input>())
+        for (auto& axis : controller->state.axes)
+            if (axis.usage_page == 1 && axis.usage == 0x31)
+                axis.normalized = -axis.normalized;
+auto result = Send_Input(inputs);
 ```
 
-Run the EXEs from `bin/Native/`. Each checks its own product's installed driver
-service, initializes devices, receives a batch, transforms it and calls
-`Send_Input(inputs)`. The loop has no sleep, FPS limit or per-report console
-logging. A send error or incomplete batch stops the process with its error.
-Closing the process / Ctrl+C releases capture and restores passthrough.
-The shared one-hour per-boot demo allowance applies.
+The complete examples also handle null/relative controls, HID layouts and native XInput/GIP states,
+check initialization/send failures, and forward unrelated fields/families.
+`INFINITE` sleeps until input arrives; there is no polling, countdown, FPS limit,
+per-packet descriptor query or manually managed context. Buffers and capture
+lifetime belong to the library. Process exit closes capture in the driver.
 
-### HID layouts
+Build from the repository root with `./Build.ps1 -Target ExamplesConsole`.
+EXEs are written to `bin/Native/`. Download precompiled programs from the release's
+**examples ZIP**; the **SDK ZIP** includes their complete sources.
 
-Native XUSB/GIP sticks and triggers have defined fields. Generic HID controls
-come from the descriptor, with their report and collection identities preserved.
-Explicit HID trigger controls are supported. For conventional unlabelled axes,
-the default `auto` layout uses X/Y for the left stick and Z/Rz for the right stick
-when both exist; otherwise it uses Rx/Ry. With a Z/Rz stick, Rx/Ry are treated as
-separate triggers. Repeated controls in the current report are processed too.
+The demo is limited to **one hour per boot**, shared across applications.
 
-Some descriptors use the same usages for different purposes. Select the layout
-matching the descriptor rather than a device VID/PID:
+## Controller fields
 
-```powershell
-.\Controller_01_Invert_Vertical.exe --hid-layout xy-rxry
-.\Controller_03_Instant_Triggers.exe --hid-layout xy-zrz
-```
+All five controller examples handle HID, XInput/XUSB, XInputHID and GIP in the
+same receive loop. HID uses dynamic `state.axes`, `state.triggers` and
+`state.buttons`; XUSB/GIP use their native `state` fields. Only the current
+report's decoded controls are edited; unknown fields and raw extensions pass through.
 
-`xy-rxry` means X/Y + Rx/Ry sticks, with Z/Rz as separate triggers;
-`xy-zrz` means X/Y + Z/Rz sticks, with Rx/Ry triggers.
-Relative/null/constant-range fields, hats, unknown usages and opaque extensions
-remain unchanged. A lone Z in automatic mode is not guessed to be a trigger:
-it may encode two combined triggers. Vendor encodings or stick pairs split across
-reports may require adapting the clearly marked axis selection in the example.
-Descriptor decoding alone cannot establish a universal stick/trigger meaning.
+HID descriptors do not universally identify stick/trigger roles. Auto selects
+X/Y + Z/Rz when present in the same report/collection/element, otherwise X/Y + Rx/Ry.
+Use `--hid-layout xy-rxry` or `--hid-layout xy-zrz` for an ambiguous descriptor.
+A lone combined-trigger Z, hats, null/relative controls and vendor data are preserved.
+Button pairing stays within each report/collection/usage page; an odd last button stays unchanged.
 
-HID button swaps pair consecutive declared controls within the same report,
-usage page and collection. An odd trailing button stays unchanged. Native Guide
-and reserved bits stay unchanged. A D-pad represented as a HID hat is not a
-button pair; it is preserved.
-
-### Response curves
-
-The deadzone is **per axis**, not radial:
-`out = sign(in) * max(0, (abs(in) - 0.5) / 0.5)`.
-For example, 40% becomes 0%, 75% becomes 50%, and 100% stays 100%.
-
-```powershell
-.\Controller_05_Inverse_Exponential.exe --exponent 2
-```
-
-The inverse curve is `out = sign(in) * abs(in)^(1/exponent)`, with an exponent
-from 1 to 16. It compensates a game curve `sign(x) * abs(x)^exponent` only when
-the exponents match and no other deadzone, acceleration or response processing
-intervenes. There is no universal inverse for every game's "exponential" setting.
-
-The former **Controller Minimal** only received and forwarded all families
-unchanged. It was a developer skeleton, not a remap. These five examples replace
-its EXE; the [main README](../README.md#minimal-example-receive-read-forward)
-keeps the basic receive/read/forward loop.
+The 50% deadzone is per axis, not radial: 40% -> 0%, 75% -> 50%, 100% -> 100%.
+The inverse exponential uses `sign(x) * abs(x)^(1/exponent)`; use `--exponent 2`
+(default), or a matching value from 1 to 16. It only compensates a game applying
+the matching power curve, without additional deadzones/acceleration.
