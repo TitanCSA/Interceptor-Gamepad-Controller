@@ -2,7 +2,7 @@
 
 The [complete 1.0.11.0 demo](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/tag/v1.0.11.0-demo)
 contains Microsoft-signed kernel **1.0.5.0**, rebuilt examples and the updated SDK.
-The two-hour allowance is unchanged. Test signing and development certificates are not required.
+The one-hour allowance is unchanged. Test signing and development certificates are not required.
 The Microsoft signature covers the driver package, not the installer or example EXEs.
 
 ## Install or upgrade
@@ -100,7 +100,7 @@ automatically; restart only when requested.
 ## Demo clock component
 
 Setup includes the Microsoft-signed `TitanDemoClock.sys` companion. It keeps this
-product's two-hour allowance in kernel memory until Windows Restart, independently
+product's one-hour allowance in kernel memory until Windows Restart, independently
 of unloading or reinstalling the main driver. It has no user-mode background process
 and is not attached to the input stack. A product-owned driver service registers it;
 removing another product does not remove this product's registration. Missing or
