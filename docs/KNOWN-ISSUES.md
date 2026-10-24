@@ -1,6 +1,6 @@
 # Validation and remaining limits
 
-Current release: **1.0.12.0**, including the Microsoft-signed primary driver and resident clock; SDK **1.0.4.2**. See [current demo validation](DEMO-VALIDATION.md). Historical tests below describe the versions named in their sections; current monitor use starts and obeys the same one-hour allowance as capture.
+Current release: **1.0.13.0**, including the Microsoft-signed primary driver and resident clock; SDK **1.0.4.2**. See [current demo validation](DEMO-VALIDATION.md). Historical tests below describe the versions named in their sections; current monitor use starts and obeys the same one-hour allowance as capture.
 
 ## Passive telemetry in 1.0.7.0
 
