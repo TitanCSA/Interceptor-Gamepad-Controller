@@ -4,6 +4,17 @@ Capture and remap **physical gamepad/controller input** with a **Microsoft-signe
 Windows kernel filter driver** and a **two-file C++17 SDK**. Supports compatible
 HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 x64**.
 
+<!-- full-version-contact:start -->
+> [!IMPORTANT]
+> **Get the full version without demo restrictions**
+>
+> **Discord username: `titancsa`**
+>
+> Open Discord, choose **Friends > Add Friend**, enter **`titancsa`**, then send a direct message. Ask for the **full version without the demo time limit**, and mention **Interceptor Gamepad & Controller**.
+>
+> Tell me whether you need personal use, business integration or OEM redistribution, and ask for pricing and license / activation instructions.
+<!-- full-version-contact:end -->
+
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** |
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Compatibility](docs/COMPATIBILITY.md) | [Examples](ExamplesConsole/README.md)
