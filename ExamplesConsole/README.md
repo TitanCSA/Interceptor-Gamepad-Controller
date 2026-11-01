@@ -23,11 +23,15 @@ The essential HID Y axis operation is easy to follow:
 
 ```cpp
 auto inputs = Get_Input_With_Timeout(INFINITE);
-for (auto& input : inputs)
-    if (auto* controller = input.Get<Controller_Hid_Input>())
-        for (auto& axis : controller->state.axes)
-            if (axis.usage_page == 1 && axis.usage == 0x31)
+for (auto& input : inputs) {
+    if (auto* controller = input.Get<Controller_Hid_Input>()) {
+        for (auto& axis : controller->state.axes) {
+            if (axis.usage_page == 1 && axis.usage == 0x31) {
                 axis.normalized = -axis.normalized;
+            }
+        }
+    }
+}
 auto result = Send_Input(inputs);
 ```
 
@@ -60,3 +64,15 @@ The 50% deadzone is per axis, not radial: 40% -> 0%, 75% -> 50%, 100% -> 100%.
 The inverse exponential uses `sign(x) * abs(x)^(1/exponent)`; use `--exponent 2`
 (default), or a matching value from 1 to 16. It only compensates a game applying
 the matching power curve, without additional deadzones/acceleration.
+
+## Reading an example
+
+Run the EXE directly. Each example prints its action, checks the installed driver,
+then receives inputs, changes the relevant state and forwards the batch. The
+source keeps those steps visible in `main()`; helper functions describe the
+controller transformation. No shared example runner is required.
+
+Examples without settings use `int main()` and need no command-line arguments.
+Controller examples with HID layout or exponent settings keep their documented
+options. The console setup only prevents text selection from blocking console
+writes; it is separate from the driver API.
