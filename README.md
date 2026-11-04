@@ -87,6 +87,15 @@ example application using this driver and SDK: scripts, macros, script-defined
 settings and continuous IN / OUT monitoring. Its C++ source shows how to build
 a full application on top of the same capture and forwarding API.
 
+For narrower application examples, see
+[Curve Controller](https://github.com/TitanCSA/Curve-Controller) for radial or
+separate-X/Y stick response curves, and
+[Cronus Interceptor](https://github.com/TitanCSA/Cronus-Interceptor) for an
+independent studio implementing a documented subset of GPC. The latter is a
+compatibility preview, not the official Cronus compiler or hardware. These MIT
+applications use this edition's private driver and share its one-hour demo;
+live support still depends on the physical controller profile and transport.
+
 ## C++ SDK
 
 Add [`Interceptor.h`](Interceptor/Interceptor.h) and
