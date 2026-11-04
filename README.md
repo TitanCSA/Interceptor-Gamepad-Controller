@@ -17,7 +17,7 @@ HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 
 
 **[Download](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)** |
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
-[Compatibility](docs/COMPATIBILITY.md) | [Examples](ExamplesConsole/README.md)
+[Compatibility](docs/COMPATIBILITY.md) | [Examples](Examples/Console/README.md)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
@@ -78,7 +78,7 @@ one-hour demo allowance. [What IN and OUT measure](docs/PASSIVE-MONITOR.md).
 
 ## Example applications
 
-The [five standalone controller examples](ExamplesConsole/README.md) demonstrate
+The [five standalone controller examples](Examples/Console/README.md) demonstrate
 vertical inversion, button swaps, instant triggers, 50% stick deadzone and an
 inverse exponential curve. Each supports HID, XInput/XUSB, XInputHID and GIP.
 
@@ -125,10 +125,12 @@ contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
 
 ```text
 Interceptor/       Interceptor.h and Interceptor.cpp
-ExamplesConsole/   Five complete controller remapping examples
-ExamplesUI/        Graphical input viewer
-InstallerConsole/  Console installer
-InstallerUI/       GUI, setup engine and compiled driver/recovery binaries
+Examples/
+  Console/         Five complete controller remapping examples
+  UI/              Graphical input viewer
+Installer/
+  Console/         Console installer
+  UI/              GUI, setup engine and compiled driver/recovery binaries
 docs/ licenses/    Guides, screenshots and license terms
 ```
 
