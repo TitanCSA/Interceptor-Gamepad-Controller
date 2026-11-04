@@ -93,7 +93,7 @@ separate-X/Y stick response curves, and
 [Cronus Interceptor](https://github.com/TitanCSA/Cronus-Interceptor) for an
 independent studio implementing a documented subset of GPC. The latter is a
 compatibility preview, not the official Cronus compiler or hardware. These MIT
-applications use this edition's private driver and share its one-hour demo;
+applications use this edition's demo driver and share its one-hour demo;
 live support still depends on the physical controller profile and transport.
 
 ## C++ SDK
@@ -118,6 +118,12 @@ which has its own service, SDK and demo allowance. Remove an overlapping combine
 
 ## Downloads and build
 
+Demo/evaluation driver source is available; see [driver/README.md](driver/README.md) for
+build instructions and separate evaluation-source terms. Those terms apply to
+Titan-authored driver code. Third-party source licenses and existing application/SDK
+licenses remain applicable. Full/commercial implementation and private signing or
+activation material are excluded.
+
 The [latest release](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/latest)
 contains **InterceptorSetup.exe**, **InterceptorSetupConsole.exe**,
 **InterceptorExampleUI.exe**, complete/examples/source SDK ZIPs and
@@ -136,8 +142,7 @@ docs/ licenses/    Guides, screenshots and license terms
 
 Build user-mode tools with Visual Studio 2022 C++ tools, a Windows SDK and CMake:
 `powershell -ExecutionPolicy Bypass -File .\Build.ps1`.
-The signed driver and compiled recovery binaries are supplied; **kernel source
-is not included**. [Build guide](docs/BUILD.md). User-mode source is [MIT](LICENSE);
+The signed driver and compiled recovery binaries are supplied; **Demo/evaluation driver source is documented in [driver/README.md](driver/README.md)**. [Build guide](docs/BUILD.md). User-mode source is [MIT](LICENSE);
 the driver has [separate terms](licenses/BINARY-LICENSE.txt).
 
 <a id="one-hour-demo"></a>
