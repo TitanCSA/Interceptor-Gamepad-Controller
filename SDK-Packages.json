@@ -104,10 +104,11 @@
       "registry_published": false,
       "consumer_build_verified": true,
       "documentation_bundled": true,
-      "publication_on_hold_by_owner": true
+      "publication_on_hold_by_owner": false,
+      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
     },
     "NET/nuget": {
-      "status": "built_verified_publication_on_hold_by_owner",
+      "status": "built_verified_requires_trusted_publishing_policy",
       "name": "InterceptorGamepadController.SDK",
       "version": "1.0.0",
       "directory": "Interceptor-Gamepad-Controller-NET-nuget",
@@ -118,7 +119,8 @@
       "module": "interceptor_gamepad_controller",
       "dll_name": "InterceptorGamepadControllerBridge.dll",
       "api_prefix": "interceptor_gamepad_controller_",
-      "publication_on_hold_by_owner": true
+      "publication_on_hold_by_owner": false,
+      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
     },
     "Python/pypi": {
       "status": "built_fixture_and_production_verified",
