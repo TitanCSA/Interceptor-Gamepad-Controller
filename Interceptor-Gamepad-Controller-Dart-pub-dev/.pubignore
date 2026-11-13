@@ -1,0 +1,5 @@
+!lib/native/
+!lib/native/InterceptorGamepadControllerBridge.dll
+.dart_tool/
+pubspec.lock
+RELEASED.json
