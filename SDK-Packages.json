@@ -98,29 +98,28 @@
       "github_directory": "packaging/native"
     },
     "CPP/nuget": {
-      "status": "account_email_confirmed_requires_matching_trusted_publishing_policy",
+      "status": "published_payload_verified",
       "name": "Interceptor-Gamepad-Controller.Native",
       "version": "1.0.13",
-      "registry_published": false,
-      "consumer_build_verified": true,
+      "url": "https://www.nuget.org/packages/Interceptor-Gamepad-Controller.Native/1.0.13",
+      "public_payload_verified": true,
+      "public_consumer_verified": false,
+      "local_consumer_verified": true,
+      "registry_published": true,
       "documentation_bundled": true,
-      "publication_on_hold_by_owner": false,
-      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
+      "publication_on_hold_by_owner": false
     },
     "NET/nuget": {
-      "status": "built_verified_requires_trusted_publishing_policy",
+      "status": "published_payload_verified",
       "name": "InterceptorGamepadController.SDK",
       "version": "1.0.0",
-      "directory": "Interceptor-Gamepad-Controller-NET-nuget",
-      "registry_published": false,
-      "documentation_bundled": true,
-      "url": null,
+      "url": "https://www.nuget.org/packages/InterceptorGamepadController.SDK/1.0.0",
+      "public_payload_verified": true,
       "public_consumer_verified": false,
-      "module": "interceptor_gamepad_controller",
-      "dll_name": "InterceptorGamepadControllerBridge.dll",
-      "api_prefix": "interceptor_gamepad_controller_",
-      "publication_on_hold_by_owner": false,
-      "nuget_publication_status": "ready_requires_trusted_publishing_policy"
+      "local_consumer_verified": true,
+      "registry_published": true,
+      "documentation_bundled": true,
+      "publication_on_hold_by_owner": false
     },
     "Python/pypi": {
       "status": "built_fixture_and_production_verified",
@@ -171,13 +170,13 @@
       "api_prefix": "interceptor_gamepad_controller_"
     },
     "JavaScript/npm": {
-      "status": "registry_publication_requires_action",
+      "status": "submitted_requires_indexing",
       "name": "interceptor-gamepad-controller",
       "version": "1.0.0",
       "directory": "Interceptor-Gamepad-Controller-JavaScript-npm",
       "registry_published": false,
       "documentation_bundled": true,
-      "url": "https://www.npmjs.com/package/interceptor-gamepad-controller",
+      "url": null,
       "public_consumer_verified": false,
       "module": "interceptor_gamepad_controller",
       "dll_name": "InterceptorGamepadControllerBridge.dll",

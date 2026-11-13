@@ -6,12 +6,12 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | --- | --- | --- |
 | CPP/vcpkg | published_custom_registry | interceptor-gamepad-controller |
 | CPP/conan | published_custom_source_index | [interceptor-gamepad-controller](https://github.com/TitanCSA/sdk-packages/tree/089bc73095aa8eda89bacbe10d0b9e58394b0207/conan-index) [Source](packaging/native/) |
-| CPP/nuget | account_email_confirmed_requires_matching_trusted_publishing_policy | Interceptor-Gamepad-Controller.Native |
-| NET/nuget | built_verified_requires_trusted_publishing_policy | InterceptorGamepadController.SDK [Source](Interceptor-Gamepad-Controller-NET-nuget/) |
+| CPP/nuget | published_payload_verified | [Interceptor-Gamepad-Controller.Native](https://www.nuget.org/packages/Interceptor-Gamepad-Controller.Native/1.0.13) |
+| NET/nuget | published_payload_verified | [InterceptorGamepadController.SDK](https://www.nuget.org/packages/InterceptorGamepadController.SDK/1.0.0) |
 | Python/pypi | built_fixture_and_production_verified | interceptor-gamepad-controller [Source](Interceptor-Gamepad-Controller-Python-pypi/) |
 | Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [interceptor-gamepad-controller](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [interceptor-gamepad-controller](https://crates.io/crates/interceptor-gamepad-controller) [Source](Interceptor-Gamepad-Controller-Rust-cargo/) |
-| JavaScript/npm | registry_publication_requires_action | [interceptor-gamepad-controller](https://www.npmjs.com/package/interceptor-gamepad-controller) [Source](Interceptor-Gamepad-Controller-JavaScript-npm/) |
+| JavaScript/npm | submitted_requires_indexing | interceptor-gamepad-controller [Source](Interceptor-Gamepad-Controller-JavaScript-npm/) |
 | Java/maven | published_install_verified | [interceptor-gamepad-controller](https://central.sonatype.com/artifact/io.github.titancsa/interceptor-gamepad-controller/1.0.0) [Source](Interceptor-Gamepad-Controller-Java-maven/) |
 | Java/jitpack | published_install_verified | [interceptor-gamepad-controller](https://jitpack.io/#TitanCSA/Interceptor-Gamepad-Controller/java-sdk-v1.0.0) [Source](Interceptor-Gamepad-Controller-Java-maven/) |
 | Go/modules | published_install_verified | [interceptor-gamepad-controller](https://pkg.go.dev/github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules@v1.0.0) [Source](Interceptor-Gamepad-Controller-Go-modules/) |
