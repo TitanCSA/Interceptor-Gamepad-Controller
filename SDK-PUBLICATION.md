@@ -5,11 +5,11 @@ Current source layout and registry coverage. A GitHub download is distinct from 
 | Target | Status | Package / documentation |
 | --- | --- | --- |
 | CPP/vcpkg | published_custom_registry | interceptor-gamepad-controller |
-| CPP/conan | public_recipe_builds_locally |  [Source](packaging/native/) |
+| CPP/conan | published_custom_source_index | [interceptor-gamepad-controller](https://github.com/TitanCSA/sdk-packages/tree/089bc73095aa8eda89bacbe10d0b9e58394b0207/conan-index) [Source](packaging/native/) |
 | CPP/nuget | paused_pending_owner_email_confirmation | Interceptor-Gamepad-Controller.Native |
 | NET/nuget | built_verified_publication_on_hold_by_owner | InterceptorGamepadController.SDK [Source](Interceptor-Gamepad-Controller-NET-nuget/) |
 | Python/pypi | built_fixture_and_production_verified | interceptor-gamepad-controller [Source](Interceptor-Gamepad-Controller-Python-pypi/) |
-| Python/conda-forge | built_tested_requires_official_review | interceptor-gamepad-controller [Source](packaging/conda/) |
+| Python/conda-forge | custom_channel_install_verified_requires_conda_forge_review | [interceptor-gamepad-controller](https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel) [Source](packaging/conda/) |
 | Rust/cargo | published_install_verified | [interceptor-gamepad-controller](https://crates.io/crates/interceptor-gamepad-controller) [Source](Interceptor-Gamepad-Controller-Rust-cargo/) |
 | JavaScript/npm | awaiting_browser_publication_authentication | [interceptor-gamepad-controller](https://www.npmjs.com/package/interceptor-gamepad-controller) [Source](Interceptor-Gamepad-Controller-JavaScript-npm/) |
 | Java/maven | published_install_verified | [interceptor-gamepad-controller](https://central.sonatype.com/artifact/io.github.titancsa/interceptor-gamepad-controller/1.0.0) [Source](Interceptor-Gamepad-Controller-Java-maven/) |
