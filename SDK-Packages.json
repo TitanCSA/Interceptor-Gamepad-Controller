@@ -171,7 +171,7 @@
       "api_prefix": "interceptor_gamepad_controller_"
     },
     "JavaScript/npm": {
-      "status": "awaiting_browser_publication_authentication",
+      "status": "registry_publication_requires_action",
       "name": "interceptor-gamepad-controller",
       "version": "1.0.0",
       "directory": "Interceptor-Gamepad-Controller-JavaScript-npm",
