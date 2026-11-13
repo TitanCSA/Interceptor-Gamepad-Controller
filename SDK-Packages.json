@@ -170,14 +170,14 @@
       "api_prefix": "interceptor_gamepad_controller_"
     },
     "JavaScript/npm": {
-      "status": "submitted_requires_indexing",
+      "status": "published_install_verified",
       "name": "interceptor-gamepad-controller",
       "version": "1.0.0",
       "directory": "Interceptor-Gamepad-Controller-JavaScript-npm",
-      "registry_published": false,
+      "registry_published": true,
       "documentation_bundled": true,
-      "url": null,
-      "public_consumer_verified": false,
+      "url": "https://www.npmjs.com/package/interceptor-gamepad-controller",
+      "public_consumer_verified": true,
       "module": "interceptor_gamepad_controller",
       "dll_name": "InterceptorGamepadControllerBridge.dll",
       "api_prefix": "interceptor_gamepad_controller_"
