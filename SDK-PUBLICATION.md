@@ -6,24 +6,24 @@ Choisis le paquet a installer. Installe son outil habituel (Node.js/npm, Python/
 
 Les SDK natifs sont destines a Windows x64. Java utilise Java22+ (Kotlin passe par le SDK Java). Flutter utilise le SDK Dart ; le chargement de la DLL doit etre configure dans l application. AutoHotInterceptor .NET utilise .NET Framework4.8.
 
-| Paquet | Registre | Disponibilite | Installation / utilisation |
-| --- | --- | --- | --- |
-| `interceptor-gamepad-controller` | vcpkg | Registre TitanCSA disponible (configuration ci-dessous) | `vcpkg install interceptor-gamepad-controller:x64-windows` |
-| `interceptor-gamepad-controller` | Conan | Registre TitanCSA disponible (configuration ci-dessous) | `conan install --requires=interceptor-gamepad-controller/1.0.13 -r titancsa --build=missing -s compiler.cppstd=17` |
-| `Interceptor-Gamepad-Controller.Native` | NuGet | Publie et verifie | `Install-Package Interceptor-Gamepad-Controller.Native -Version 1.0.13` |
-| `InterceptorGamepadController.SDK` | NuGet | Publie et verifie | `dotnet add package InterceptorGamepadController.SDK --version 1.0.0` |
-| `interceptor_gamepad_controller` | PyPI | Pas encore disponible / validation en cours | Commande prevue apres publication : `python -m pip install interceptor-gamepad-controller==1.0.0` |
-| `interceptor-gamepad-controller` | Conda | Canal TitanCSA disponible ; acceptation conda-forge encore en attente | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-gamepad-controller` |
-| `interceptor_gamepad_controller` | crates.io | Publie et verifie | `cargo add interceptor-gamepad-controller@1.0.0` |
-| `interceptor_gamepad_controller` | npm | Publie et verifie | `npm install interceptor-gamepad-controller@1.0.0` |
-| `io.github.titancsa:interceptor-gamepad-controller` | Maven Central | Publie et verifie | `io.github.titancsa:interceptor-gamepad-controller:1.0.0 (pom.xml / Gradle)` |
-| `com.github.TitanCSA:Interceptor-Gamepad-Controller` | JitPack | Publie et verifie | `com.github.TitanCSA:Interceptor-Gamepad-Controller:java-sdk-v1.0.0 (avec le depot JitPack)` |
-| `github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules` | Go Modules | Publie et verifie | `go get github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules@v1.0.0` |
-| `github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules` | pkg.go.dev | Publie et verifie | `Documentation : https://pkg.go.dev/github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules@v1.0.0` |
-| `interceptor_gamepad_controller` | PowerShell Gallery | Publie et verifie | `Install-Module InterceptorGamepadController -RequiredVersion 1.0.0 -Scope CurrentUser` |
-| `interceptor_gamepad_controller` | pub.dev | Publie et verifie | `dart pub add interceptor_gamepad_controller:1.0.0` |
-| `interceptor_gamepad_controller` | RubyGems | Publie et verifie | `gem install interceptor-gamepad-controller -v 1.0.0` |
-| `interceptor_gamepad_controller` | Packagist | Pas encore disponible / validation en cours | Commande prevue apres publication : `composer require titancsa/interceptor-gamepad-controller:1.0.0` |
+| Registre | Paquet | Installation / utilisation |
+| --- | --- | --- |
+| vcpkg | `interceptor-gamepad-controller` | `vcpkg install interceptor-gamepad-controller:x64-windows` |
+| Conan | `interceptor-gamepad-controller` | `conan install --requires=interceptor-gamepad-controller/1.0.13 -r titancsa --build=missing -s compiler.cppstd=17` |
+| NuGet | `Interceptor-Gamepad-Controller.Native` | `Install-Package Interceptor-Gamepad-Controller.Native -Version 1.0.13` |
+| NuGet | `InterceptorGamepadController.SDK` | `dotnet add package InterceptorGamepadController.SDK --version 1.0.0` |
+| PyPI | `interceptor_gamepad_controller` | Commande prevue apres publication : `python -m pip install interceptor-gamepad-controller==1.0.0` |
+| Conda | `interceptor-gamepad-controller` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-gamepad-controller` (canal TitanCSA) |
+| crates.io | `interceptor_gamepad_controller` | `cargo add interceptor-gamepad-controller@1.0.0` |
+| npm | `interceptor_gamepad_controller` | `npm install interceptor-gamepad-controller@1.0.0` |
+| Maven Central | `io.github.titancsa:interceptor-gamepad-controller` | `io.github.titancsa:interceptor-gamepad-controller:1.0.0 (pom.xml / Gradle)` |
+| JitPack | `com.github.TitanCSA:Interceptor-Gamepad-Controller` | `com.github.TitanCSA:Interceptor-Gamepad-Controller:java-sdk-v1.0.0 (avec le depot JitPack)` |
+| Go Modules | `github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules` | `go get github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules@v1.0.0` |
+| pkg.go.dev | `github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules` | `Documentation : https://pkg.go.dev/github.com/TitanCSA/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-Go-modules@v1.0.0` |
+| PowerShell Gallery | `interceptor_gamepad_controller` | `Install-Module InterceptorGamepadController -RequiredVersion 1.0.0 -Scope CurrentUser` |
+| pub.dev | `interceptor_gamepad_controller` | `dart pub add interceptor_gamepad_controller:1.0.0` |
+| RubyGems | `interceptor_gamepad_controller` | `gem install interceptor-gamepad-controller -v 1.0.0` |
+| Packagist | `interceptor_gamepad_controller` | Commande prevue apres publication : `composer require titancsa/interceptor-gamepad-controller:1.0.0` |
 
 ## Configuration vcpkg et Conan
 
