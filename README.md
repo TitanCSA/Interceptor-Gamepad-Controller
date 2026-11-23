@@ -8,6 +8,8 @@ HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Compatibility](docs/COMPATIBILITY.md) | [Examples](Examples/Console/README.md)
 
+[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-gamepad-controller/)
+
 | Setup and diagnostics | Input viewer |
 | --- | --- |
 | ![Controller installer](docs/images/installer.png) | ![Viewer with simulated controller input](docs/images/viewer.png) |
