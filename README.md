@@ -146,7 +146,7 @@ reinstalling does not reset it. Capture diagnostics can start the allowance.
 At expiry, captures are released and capture/injection stop; physical input passes
 through normally. Passive IN / OUT monitoring and raw GIP diagnostics follow the
 same deadline. Use Windows **Restart** for a new allowance.
-For the unrestricted version, DM **`titancsa`** on Discord.
+[Get the licensed Release](https://licences.configcsa.com/interceptor-gamepad-controller).
 
 This independent project evolves the workflow popularized by
 [oblitum/Interception](https://github.com/oblitum/Interception), with its own
