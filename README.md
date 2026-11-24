@@ -20,6 +20,8 @@ Screenshots illustrate the interface; preview controller inputs are simulated.
 
 ## Install and use
 
+Follow the [physical gamepad quickstart](https://titancsa.github.io/guides/gamepad-controller-first-run/) to identify the Windows input family and try the bundled stick deadzone example.
+
 1. Download this repository's **InterceptorSetup.exe**, run it and accept elevation.
 2. Choose **Install / reinstall**. If requested, use Windows **Restart** and
    reopen setup to finish associations. Continue until no restart is requested.
