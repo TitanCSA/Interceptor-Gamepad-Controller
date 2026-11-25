@@ -264,7 +264,7 @@ Les sources, licences, guides API et exemples sont regroupes dans [le depot SDK 
 | PyPI | `interceptor-gamepad-controller` | Commande prevue apres publication : `python -m pip install interceptor-gamepad-controller==1.0.0` |
 | Conda | `interceptor-gamepad-controller` | `conda install --override-channels -c https://raw.githubusercontent.com/TitanCSA/sdk-packages/089bc73095aa8eda89bacbe10d0b9e58394b0207/conda-channel -c conda-forge interceptor-gamepad-controller` (canal TitanCSA) |
 | crates.io | `interceptor-gamepad-controller` | `cargo add interceptor-gamepad-controller@1.0.0` |
-| npm | `interceptor-gamepad-controller` | `npm install interceptor-gamepad-controller@1.0.0` |
+| npm | [`interceptor-gamepad-controller`](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-JavaScript-npm#readme) | `npm install interceptor-gamepad-controller@1.0.0` |
 | GitHub | [interceptor-gamepad-controller 1.0.1](https://github.com/TitanCSA/sdk-packages/releases/download/node-input-sdk-v1.0.1/interceptor-gamepad-controller-1.0.1.tgz) | `npm install ./interceptor-gamepad-controller-1.0.1.tgz` |
 | Maven Central | `io.github.titancsa:interceptor-gamepad-controller` | `io.github.titancsa:interceptor-gamepad-controller:1.0.0 (pom.xml / Gradle)` |
 | JitPack | `com.github.TitanCSA:Interceptor-Gamepad-Controller` | `com.github.TitanCSA:Interceptor-Gamepad-Controller:java-sdk-v1.0.0 (avec le depot JitPack)` |
