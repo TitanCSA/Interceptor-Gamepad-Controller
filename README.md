@@ -115,6 +115,8 @@ live support still depends on the physical controller profile and transport.
 
 ## C++ SDK
 
+**First SDK check.** Extract the [starter ZIP](https://titancsa.github.io/downloads/first-sdk-checks.zip) and run `python scripts/test_first_sdk.py interceptor-gamepad-controller --run` from that folder. It reads the installed driver's status without opening a capture session. [Tools required](https://titancsa.github.io/guides/installer-and-sdk/).
+
 Add [`Interceptor.h`](Interceptor/Interceptor.h) and
 [`Interceptor.cpp`](Interceptor/Interceptor.cpp) to your Windows x64 C++17 project.
 Compile the source once and include the header. No Interceptor DLL or prebuilt
