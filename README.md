@@ -1,5 +1,15 @@
 # Interceptor Gamepad & Controller - Windows Kernel Filter Driver
 
+<!-- full-version-contact:start -->
+> [!IMPORTANT]
+> **Get the version without the one-hour demo limit**
+>
+> **Discord · `titancsa`**. Open [Discord](https://discord.com/app), choose **Friends → Add Friend**, enter **`titancsa`** and send a message.
+> Send the project name and ask for its full version. TitanCSA will share the purchase details privately.
+>
+> **FR · Version sans la limite d’une heure.** Ajoute **`titancsa`** sur Discord et envoie le nom du projet. Le lien d’achat est communiqué en privé.
+<!-- full-version-contact:end -->
+
 Capture and remap **physical gamepad/controller input** with a **Microsoft-signed
 Windows kernel filter driver** and a **two-file C++17 SDK**. Supports compatible
 HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 x64**.
@@ -8,7 +18,7 @@ HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Compatibility](docs/COMPATIBILITY.md) | [Examples](Examples/Console/README.md)
 
-[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-gamepad-controller/) · [Buy Release · €400 Lifetime](https://licences.configcsa.com/interceptor-gamepad-controller)
+[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-gamepad-controller/) · [Contact titancsa on Discord](https://titancsa.github.io/about/evidence/#release-contact)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
@@ -148,7 +158,7 @@ reinstalling does not reset it. Capture diagnostics can start the allowance.
 At expiry, captures are released and capture/injection stop; physical input passes
 through normally. Passive IN / OUT monitoring and raw GIP diagnostics follow the
 same deadline. Use Windows **Restart** for a new allowance.
-[Get the licensed Release](https://licences.configcsa.com/interceptor-gamepad-controller).
+[Contact titancsa on Discord](https://titancsa.github.io/about/evidence/#release-contact).
 
 This independent project evolves the workflow popularized by
 [oblitum/Interception](https://github.com/oblitum/Interception), with its own
@@ -254,11 +264,6 @@ Pour vcpkg et Conan, configure d abord le registre TitanCSA avec [le guide compl
 Les anciens imports Go et versions JitPack gardent leurs tags. Pour les anciennes archives SDK, utilise [les liens de remplacement](https://github.com/TitanCSA/sdk-packages/blob/main/release-assets/URL-MIGRATION.json).
 <!-- central-sdk-packages:end -->
 
-<!-- full-version-contact:start -->
-> **Licensed Release** · [Buy Interceptor Gamepad & Controller directly](https://licences.configcsa.com/interceptor-gamepad-controller).
->
-> For integration, OEM and support questions, contact `titancsa` on Discord.
-<!-- full-version-contact:end -->
 
 ## Performance & Benchmarks
 
