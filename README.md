@@ -1,14 +1,28 @@
 # Interceptor Gamepad & Controller - Windows Kernel Filter Driver
 
+<!-- simple-start:start -->
+Read or change the buttons and sticks of a compatible physical gamepad.
+
+**64-bit Windows 10 version 1709 or later, or Windows 11.**
+
+If another Interceptor edition is installed, follow [the removal steps](docs/INSTALLATION.md) first.
+
+**Try it**
+
+1. Run [InterceptorSetup.exe](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/download/v1.0.13.0-demo/InterceptorSetup.exe) and choose **Install / reinstall**. If setup asks for a restart, restart Windows and reopen it.
+2. Plug in your gamepad and open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/download/v1.0.13.0-demo/InterceptorExampleUI.exe).
+3. Move a stick or press a button and check that its value changes in the viewer. Click **Stop** when you finish.
+<!-- simple-start:end -->
+
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
-> **Get the version without the one-hour demo limit**
+> **Version without the one-hour demo limit**
 >
-> **Discord · `titancsa`**. Open [Discord](https://discord.com/app), choose **Friends → Add Friend**, enter **`titancsa`** and send a message.
-> Send the project name and ask for its full version. TitanCSA will share the purchase details privately.
->
-> **FR · Version sans la limite d’une heure.** Ajoute **`titancsa`** sur Discord et envoie le nom du projet. Le lien d’achat est communiqué en privé.
+> In [Discord](https://discord.com/app), choose **Add Friend** and enter **`titancsa`**. Send the project name. Purchase details are sent privately.
 <!-- full-version-contact:end -->
+
+<details>
+<summary>Project details and screenshots</summary>
 
 Capture and remap **physical gamepad/controller input** with a **Microsoft-signed
 Windows kernel filter driver** and a **two-file C++17 SDK**. Supports compatible
@@ -18,7 +32,6 @@ HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 
 [Installation](docs/INSTALLATION.md) | [C++ API](docs/API.md) |
 [Compatibility](docs/COMPATIBILITY.md) | [Examples](Examples/Console/README.md)
 
-[Project overview and edition guide](https://titancsa.github.io/projects/interceptor-gamepad-controller/) · [Contact titancsa on Discord](https://titancsa.github.io/about/evidence/#release-contact)
 
 | Setup and diagnostics | Input viewer |
 | --- | --- |
@@ -26,11 +39,12 @@ HID, XInput/XUSB, XInputHID and GIP profiles on **Windows 10 1709+ / Windows 11 
 
 Screenshots illustrate the interface; preview controller inputs are simulated.
 
+</details>
+
 <a id="quick-start"></a>
 
 ## Install and use
 
-Follow the [physical gamepad quickstart](https://titancsa.github.io/guides/gamepad-controller-first-run/) to identify the Windows input family and try the bundled stick deadzone example.
 
 1. Download this repository's **InterceptorSetup.exe**, run it and accept elevation.
 2. Choose **Install / reinstall**. If requested, use Windows **Restart** and
