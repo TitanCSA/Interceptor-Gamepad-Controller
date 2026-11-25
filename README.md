@@ -1,4 +1,4 @@
-# Interceptor Gamepad & Controller - Windows Kernel Filter Driver
+# Interceptor Gamepad & Controller
 
 <!-- simple-start:start -->
 Read or change the buttons and sticks of a compatible physical gamepad.
