@@ -16,6 +16,8 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 3. Move a stick or press a button and check that its value changes in the viewer. Click **Stop** when you finish.
 <!-- simple-start:end -->
 
+[Guide de démarrage en français](https://titancsa.github.io/fr/remapper-manette-windows/)
+
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
 > **Version without the one-hour demo limit**
