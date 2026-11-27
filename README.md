@@ -3,7 +3,7 @@
 <!-- simple-start:start -->
 Read or change the buttons and sticks of a compatible physical gamepad.
 
-[First steps](#first-steps) · [Develop](#sdk-and-packages) · [Maintain](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
+[Guide en français](https://titancsa.github.io/fr/remapper-manette-windows/) · [SDK](#sdk-and-packages) · [Full version on Discord](https://titancsa.github.io/about/evidence/#release-contact)
 
 ## First steps
 
@@ -15,8 +15,6 @@ If another Interceptor edition is installed, follow [the removal steps](docs/INS
 2. Plug in your gamepad and open [InterceptorExampleUI.exe](https://github.com/TitanCSA/Interceptor-Gamepad-Controller/releases/download/v1.0.13.0-demo/InterceptorExampleUI.exe).
 3. Move a stick or press a button and check that its value changes in the viewer. Click **Stop** when you finish.
 <!-- simple-start:end -->
-
-[Guide de démarrage en français](https://titancsa.github.io/fr/remapper-manette-windows/)
 
 <!-- full-version-contact:start -->
 > [!IMPORTANT]
@@ -261,7 +259,7 @@ To the maximum extent permitted by applicable law, the software is provided "AS 
 
 Choose a language in the [SDK and package guide](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Gamepad-Controller#readme) for exact install commands and examples. If your example requires a driver or app, install it separately.
 
-JavaScript and TypeScript: [`interceptor-gamepad-controller`](https://github.com/TitanCSA/sdk-packages/tree/main/projects/Interceptor-Gamepad-Controller/Interceptor-Gamepad-Controller-JavaScript-npm#readme) · `npm install interceptor-gamepad-controller@1.0.0`
+[First SDK check](https://titancsa.github.io/guides/gamepad-controller-first-run/#first-sdk-check) · [Python example](https://titancsa.github.io/guides/gamepad-controller-first-run/#python-sdk) · [Package maintenance](https://github.com/TitanCSA/sdk-packages/blob/main/CONTRIBUTING.md)
 <!-- central-sdk-packages:end -->
 
 
